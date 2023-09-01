@@ -10,7 +10,7 @@ func TurnAccountCursor() *sql.DB {
 }
 
 func TurnGameCursor() *sql.DB {
-	return db_connections.GameDbConnection()
+	 return db_connections.GameDbConnection()
 }
 
 func TurnMemeCursor() *sql.DB {

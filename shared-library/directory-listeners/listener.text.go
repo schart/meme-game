@@ -30,10 +30,10 @@ func TextDirectoryListener() {
 	for {
 		select {
 		case event := <-watcher.Events:
-			log.Println("Event:", event)
+			log.Println("Event: ", event)
 
 		case err := <-watcher.Errors:
-			log.Println("Error:", err)
+			log.Println("Error: ", err)
 		}
 	}
 }

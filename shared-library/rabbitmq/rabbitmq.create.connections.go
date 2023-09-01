@@ -20,7 +20,7 @@ func failOnError(err error, msg string) {
 
 func connectToRabbitMQ(amqpURI string) RabbitMQConnection {
 	conn, err := amqp.Dial(amqpURI)
-	failOnError(err, "Failed to establish connection")
+	failOnError(err, "Failed to establish connection ")
 	return RabbitMQConnection{conn: conn}
 }
 

@@ -26,7 +26,7 @@ func SendMessage(message, queueName string) {
 		},
 	)
 
-	failOnError(err, "Failed to publish message")
+	failOnError(err, "Failed to publish message ")
 }
 
 func ReceivePhotoId(queue string) <-chan amqp.Delivery {

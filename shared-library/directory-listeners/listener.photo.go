@@ -30,10 +30,10 @@ func PhotoDirectoryListener() {
 	for {
 		select {
 		case event := <-watcher.Events:
-			log.Println("Event:", event.Op)
+			log.Println("Event: ", event.Op)
 
 		case err := <-watcher.Errors:
-			log.Println("Error:", err)
+			log.Println("Error: ", err)
 		}
 	}
 }

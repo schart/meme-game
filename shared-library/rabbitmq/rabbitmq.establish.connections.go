@@ -12,7 +12,7 @@ type RabbitMQQueue struct {
 
 func createChannel(rabbitMQConn RabbitMQConnection) RabbitMQChannel {
 	ch, err := rabbitMQConn.conn.Channel()
-	failOnError(err, "Failed to create channel")
+	failOnError(err, "Failed to create channel ")
 	return RabbitMQChannel{ch: ch}
 }
 

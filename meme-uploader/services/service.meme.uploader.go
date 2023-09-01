@@ -17,7 +17,7 @@ func PhotoUploadS(w http.ResponseWriter, r *http.Request) (string, error) {
 
 	file, handler, err := r.FormFile("file")
 	if err != nil {
-		return "", fmt.Errorf("Format of image is corrupted")
+		return "", fmt.Errorf("Format of image is corrupted ")
 	}
 	defer file.Close()
 

@@ -3,7 +3,6 @@ package utils
 import (
 	"encoding/json"
 	"net/http"
-	responseMessages "shared-library/response-codes"
 	types "shared-library/types"
 )
 
@@ -26,7 +25,7 @@ func HandleError(w http.ResponseWriter, statusCode int, errorMessage string) {
 
 func HandleSuccess(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
-	response := NewResponse(true, http.StatusOK, responseMessages.SUCCESS_PROCESS)
+	response := NewResponse(true, http.StatusOK, "Successfuly process ")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }

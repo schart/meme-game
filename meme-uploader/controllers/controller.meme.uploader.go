@@ -34,12 +34,12 @@ func PhotoUploadC(w http.ResponseWriter, r *http.Request) {
 	ext := filepath.Ext(fileName)[1:] // Take extension of file
 	fileName, err = memeService.PhotoRename(fileName, ext)
 	if err != nil {
-		utils.HandleError(w, http.StatusBadRequest,  err.Error())
+		utils.HandleError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	// Save file to database
 	rabbitmq.SendMessage(fileName, "photoq")
 
-	utils.HandleSuccess(w, )
+	utils.HandleSuccess(w)
 }
