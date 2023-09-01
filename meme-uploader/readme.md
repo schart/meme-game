@@ -1,0 +1,1 @@
+ This is the application that allows us to upload the memes and meme texts needed for our project to the database, maintain them and deploy them against specific searches.
