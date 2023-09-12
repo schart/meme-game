@@ -49,8 +49,44 @@ func ReceivePhotoId(queue string) <-chan amqp.Delivery {
 
 	for d := range msgs {
 		fmt.Printf("Received: %s\n", d.Body)
-		queries.InsertMemePhotoId(string(d.Body))
+		err := queries.InsertMemePhotoId(string(d.Body))
+		if err != nil {
+			d.Acknowledger.Nack(0, false, false)
+		}
+		d.Acknowledger.Ack(1, true)
+	}
 
+	return msgs
+}
+
+func ReceiveText(queue string) <-chan amqp.Delivery {
+	rabbitMQConn := connectToRabbitMQ(amqpURI)
+	defer rabbitMQConn.conn.Close()
+
+	rabbitMQChannel := createChannel(rabbitMQConn)
+	defer rabbitMQChannel.ch.Close()
+
+	msgs, err := rabbitMQChannel.ch.Consume(
+		queue,
+		"",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	failOnError(err, "Failed to consume messages")
+
+	for d := range msgs {
+		fmt.Printf("Received: %s\n", d.Body)
+
+		err := queries.InsertMemeText(string(d.Body))
+		if err != nil {
+			d.Acknowledger.Nack(0, false, false)
+		}
+
+		fmt.Println("Success textq: ", string(d.Body))
+		d.Acknowledger.Ack(1, true)
 	}
 
 	return msgs

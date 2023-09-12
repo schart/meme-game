@@ -2,7 +2,7 @@ package utils
 
 import (
 	"database/sql"
-	db_connections "shared-library/database"
+	db_connections "shared-library/database/connections"
 )
 
 func TurnAccountCursor() *sql.DB {
@@ -10,7 +10,7 @@ func TurnAccountCursor() *sql.DB {
 }
 
 func TurnGameCursor() *sql.DB {
-	 return db_connections.GameDbConnection()
+	return db_connections.GameDbConnection()
 }
 
 func TurnMemeCursor() *sql.DB {

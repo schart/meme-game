@@ -6,48 +6,57 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"shared-library/utils"
 
 	"github.com/gofrs/uuid"
 )
 
-// File upload to disk and database
-func PhotoUploadS(w http.ResponseWriter, r *http.Request) (string, error) {
+// File photo upload to disk
+func PhotoUploadService(w http.ResponseWriter, r *http.Request) error {
 	// Maximum image size length can be 10
 	r.ParseMultipartForm(10 << 20)
 
+	// Get file
 	file, handler, err := r.FormFile("file")
 	if err != nil {
-		return "", fmt.Errorf("Format of image is corrupted ")
+		return fmt.Errorf("Format of image is corrupted ")
 	}
 	defer file.Close()
 
+	// Get path of ll upload disk
 	filePath, _ := os.Getwd()
 	uploadPath := os.Getenv("PHOTO_UPLOAD_PATH")
 	if uploadPath == "" {
-		return "", fmt.Errorf("PHOTO_UPLOAD_PATH environment variable is not set")
+		return fmt.Errorf("PHOTO_UPLOAD_PATH environment variable is not set")
 	}
 
+	// Join path for processing
 	filePath = filepath.Join(filePath, uploadPath, handler.Filename)
 
+	// Open the file with flags
 	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		return "", fmt.Errorf("Error saving the file")
+		return fmt.Errorf("Error saving the file")
 	}
 	defer f.Close()
 
 	_, err = io.Copy(f, file)
 	if err != nil {
-		return "", fmt.Errorf("Error copying file content")
+		return fmt.Errorf("Error copying file content")
 	}
 
-	return handler.Filename, nil
+	// Rename photo
+	ext := filepath.Ext(handler.Filename)[1:]
+	go PhotoRenameservice(handler.Filename, ext)
+
+	return nil
 }
 
 // Rename photo with id
-func PhotoRename(oldName, ext string) (string, error) {
+func PhotoRenameservice(oldName, ext string) error {
 	id, err := uuid.NewV4()
 	if err != nil {
-		return "", fmt.Errorf("Error generating UUID: %v", err)
+		return fmt.Errorf("Error generating UUID: %v", err)
 	}
 
 	filePath, _ := os.Getwd()
@@ -56,11 +65,13 @@ func PhotoRename(oldName, ext string) (string, error) {
 	newFilePath := filepath.Join(filePath+uploadPath, id.String()+"."+ext)
 	oldFilePath := filepath.Join(filePath+uploadPath, oldName)
 
+	utils.RenamedVariableKeep(id.String() + "." + ext)
+
 	err = os.Rename(oldFilePath, newFilePath)
+	fmt.Println(err)
 	if err != nil {
-		return "", fmt.Errorf("Error renaming file: %v", err)
+		return fmt.Errorf("Error renaming file: %v", err)
 	}
 
-	fullName := id.String() + "." + ext
-	return fullName, nil
+	return nil
 }

@@ -8,20 +8,20 @@ import (
 	"net/http"
 	"os"
 	schemasMeme "shared-library/database/schemas"
+
 	"shared-library/rabbitmq"
 	"shared-library/utils"
 )
 
 func main() {
 	utils.EnvLoader() // Load env file information
+
 	schemasMeme.MemeCreateT()
+	// dirproccessors.JsonReader()
 
 	// Host endpoint services
-	http.HandleFunc("/uploaders/upload-text", uploaders.TextUploadC)
-	http.HandleFunc("/uploaders/upload-photo", uploaders.PhotoUploadC)
-
-	fmt.Printf("Server started on the %v:%v", os.Getenv("HOST"), os.Getenv("PORT"))
-	fmt.Println()
+	http.HandleFunc("/uploaders/upload-text", uploaders.TextUploadController)
+	http.HandleFunc("/uploaders/upload-photo", uploaders.PhotoUploadController)
 
 	// Watch directory
 	// go listeners.PhotoDirectoryListener()
@@ -29,8 +29,11 @@ func main() {
 
 	// Start rabbitmq queues
 	rabbitmq.QueueRabbitStart()
-	go rabbitmq.ReceivePhotoId("photoq")
+
+	// Restart server on the change
+	// go reloader.Reloader()
 
 	// Start server
+	fmt.Printf("Server started on the %v:%v", os.Getenv("HOST"), os.Getenv("PORT"))
 	http.ListenAndServe(os.Getenv("HOST")+":"+os.Getenv("PORT"), nil)
 }
