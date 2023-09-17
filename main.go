@@ -3,12 +3,11 @@ package main
 // my-monorepo/main.go
 
 import (
-	"fmt"
+	account "account/controllers"
 	uploaders "meme-uploader/controllers"
 	"net/http"
 	"os"
 	schemasMeme "shared-library/database/schemas"
-
 	"shared-library/rabbitmq"
 	"shared-library/utils"
 )
@@ -16,24 +15,19 @@ import (
 func main() {
 	utils.EnvLoader() // Load env file information
 
-	schemasMeme.MemeCreateT()
-	// dirproccessors.JsonReader()
+	schemasMeme.MemeCreateTables()
+	schemasMeme.AccountCreateTables()
 
 	// Host endpoint services
-	http.HandleFunc("/uploaders/upload-text", uploaders.TextUploadController)
-	http.HandleFunc("/uploaders/upload-photo", uploaders.PhotoUploadController)
-
-	// Watch directory
-	// go listeners.PhotoDirectoryListener()
-	// go listeners.TextDirectoryListener()
+	http.HandleFunc("/uploaders/text-upload", uploaders.TextUploadController)
+	http.HandleFunc("/uploaders/photo-upload", uploaders.PhotoUploadController)
+	http.HandleFunc("/account/register", account.AccountRegister)
+	http.HandleFunc("/account/login", account.AccountLogin)
 
 	// Start rabbitmq queues
 	rabbitmq.QueueRabbitStart()
 
-	// Restart server on the change
-	// go reloader.Reloader()
-
 	// Start server
-	fmt.Printf("Server started on the %v:%v", os.Getenv("HOST"), os.Getenv("PORT"))
+	// fmt.Printf("Server started on the %v:%v", os.Getenv("HOST"), os.Getenv("PORT"))
 	http.ListenAndServe(os.Getenv("HOST")+":"+os.Getenv("PORT"), nil)
 }

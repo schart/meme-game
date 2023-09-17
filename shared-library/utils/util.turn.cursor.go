@@ -5,14 +5,14 @@ import (
 	db_connections "shared-library/database/connections"
 )
 
-func TurnAccountCursor() *sql.DB {
+func AccountCursorTurn() *sql.DB {
 	return db_connections.AccountDbConnection()
 }
 
-func TurnGameCursor() *sql.DB {
+func GameCursorTurn() *sql.DB {
 	return db_connections.GameDbConnection()
 }
 
-func TurnMemeCursor() *sql.DB {
+func MemeCursorTurn() *sql.DB {
 	return db_connections.MemeDbConnection()
 }

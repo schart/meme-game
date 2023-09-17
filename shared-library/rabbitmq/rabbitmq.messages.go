@@ -49,7 +49,7 @@ func ReceivePhotoId(queue string) <-chan amqp.Delivery {
 
 	for d := range msgs {
 		fmt.Printf("Received: %s\n", d.Body)
-		err := queries.InsertMemePhotoId(string(d.Body))
+		err := queries.PhotoIdInsert(string(d.Body))
 		if err != nil {
 			d.Acknowledger.Nack(0, false, false)
 		}
@@ -80,7 +80,7 @@ func ReceiveText(queue string) <-chan amqp.Delivery {
 	for d := range msgs {
 		fmt.Printf("Received: %s\n", d.Body)
 
-		err := queries.InsertMemeText(string(d.Body))
+		err := queries.TextInsert(string(d.Body))
 		if err != nil {
 			d.Acknowledger.Nack(0, false, false)
 		}

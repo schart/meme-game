@@ -8,7 +8,7 @@ import (
 var memeCursor *sql.DB
 
 func MemeTextTable() {
-	memeCursor = cursors.TurnMemeCursor()
+	memeCursor = cursors.MemeCursorTurn()
 	memeCursor.Query(`
 		CREATE TABLE memeText (
 			id serial PRIMARY KEY,
@@ -20,7 +20,7 @@ func MemeTextTable() {
 }
 
 func MemePhotoTable() {
-	memeCursor = cursors.TurnMemeCursor()
+	memeCursor = cursors.MemeCursorTurn()
 	memeCursor.Query(`
 		CREATE TABLE memePhoto (
 			id serial PRIMARY KEY,
@@ -30,7 +30,7 @@ func MemePhotoTable() {
 
 }
 
-func MemeCreateT() {
+func MemeCreateTables() {
 	MemeTextTable()
 	MemePhotoTable()
 }

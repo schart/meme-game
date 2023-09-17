@@ -10,11 +10,12 @@ import (
 
 func PhotoUploadController(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "image/jpeg")
-	checkStatus := utils.HttpMethodSet(http.MethodPost, r)
-	if checkStatus != true {
+	checkMethod := utils.HttpMethodSet(http.MethodPost, r)
+	if checkMethod != true {
 		utils.HandleError(w, http.StatusMethodNotAllowed, "Method error expected method "+http.MethodPost)
 		return
 	}
+	
 	// Load enviroments
 	utils.EnvLoader()
 

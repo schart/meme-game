@@ -1,5 +1,5 @@
 package types
 
-type BodyTextUpload struct {
+type TextUpload struct {
 	Text string
 }

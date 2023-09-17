@@ -8,23 +8,23 @@ import (
 
 var memeCursor *sql.DB
 
-func InsertMemePhotoId(photoId string) error {
-	memeCursor = cursors.TurnMemeCursor()
+func PhotoIdInsert(photoId string) error {
+	memeCursor = cursors.MemeCursorTurn()
 	_, err := memeCursor.Query(`INSERT INTO public.memephoto(photoid) VALUES ($1);`, photoId)
 
 	if err != nil {
-		return fmt.Errorf("Error insert photoId %s", err)
+		return fmt.Errorf("Error: when insert photo id %s", err)
 	}
 
 	return nil
 }
 
-func InsertMemeText(text string) error {
-	memeCursor = cursors.TurnMemeCursor()
+func TextInsert(text string) error {
+	memeCursor = cursors.MemeCursorTurn()
 
 	_, err := memeCursor.Query(`INSERT INTO public.memetext(text) VALUES ($1);`, text)
 	if err != nil {
-		return fmt.Errorf("Error insert text %s", err)
+		return fmt.Errorf("Error: when insert text %s", err)
 	}
 
 	return nil
