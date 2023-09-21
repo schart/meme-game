@@ -44,5 +44,5 @@ func AccountLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.HandleSuccess(w)
+	utils.HandleSuccess(w, []string{})
 }

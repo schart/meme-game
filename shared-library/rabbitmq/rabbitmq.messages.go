@@ -2,7 +2,7 @@ package rabbitmq
 
 import (
 	"fmt"
-	queries "shared-library/database/queries/queries-meme-uploader"
+	queries "shared-library/database/queries/queries-meme"
 
 	"github.com/streadway/amqp"
 )

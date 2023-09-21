@@ -15,7 +15,7 @@ func PhotoUploadController(w http.ResponseWriter, r *http.Request) {
 		utils.HandleError(w, http.StatusMethodNotAllowed, "Method error expected method "+http.MethodPost)
 		return
 	}
-	
+
 	// Load enviroments
 	utils.EnvLoader()
 
@@ -42,5 +42,5 @@ func PhotoUploadController(w http.ResponseWriter, r *http.Request) {
 	// Receive and upload to db name of photo
 	rabbitmq.ReceivePhotoId("photoq")
 
-	utils.HandleSuccess(w)
+	utils.HandleSuccess(w, []string{})
 }

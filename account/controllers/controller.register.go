@@ -52,5 +52,5 @@ func AccountRegister(w http.ResponseWriter, r *http.Request) {
 
 	// Publish the token
 	http.SetCookie(w, cookie)
-	utils.HandleSuccess(w)
+	utils.HandleSuccess(w, []string{})
 }

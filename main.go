@@ -1,10 +1,8 @@
 package main
 
-// my-monorepo/main.go
-
 import (
 	account "account/controllers"
-	uploaders "meme-uploader/controllers"
+	memes "meme-uploader/controllers"
 	"net/http"
 	"os"
 	schemasMeme "shared-library/database/schemas"
@@ -19,8 +17,13 @@ func main() {
 	schemasMeme.AccountCreateTables()
 
 	// Host endpoint services
-	http.HandleFunc("/uploaders/text-upload", uploaders.TextUploadController)
-	http.HandleFunc("/uploaders/photo-upload", uploaders.PhotoUploadController)
+
+	http.HandleFunc("/meme/uploaders/text", memes.TextUploadController)
+	http.HandleFunc("/meme/uploaders/photo", memes.PhotoUploadController)
+
+	http.HandleFunc("/meme/items/text", memes.TextItemsController)
+	http.HandleFunc("/meme/items/photo", memes.PhotoItemsController)
+
 	http.HandleFunc("/account/register", account.AccountRegister)
 	http.HandleFunc("/account/login", account.AccountLogin)
 
