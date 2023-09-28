@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func AccountRegister(w http.ResponseWriter, r *http.Request) {
+func AccountRegisterController(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 
 	// Check method
