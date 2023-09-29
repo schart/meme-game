@@ -16,7 +16,7 @@ func AccountLogoutController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check token
+	// Check token, You are must be logged in.
 	statusToken := interceptors.TokenCheck(w, r)
 	if statusToken != true {
 		utils.HandleError(w, http.StatusUnauthorized, "You are already have not session")
