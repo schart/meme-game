@@ -1,10 +1,8 @@
-Account interesting with user informations like username, password, score.
-which support login, register for now.
-
-
+Account interesting with user informations like username, password, which support login, register for now.
 
 Endpoints:
-        root endpoint: account -> /account/?
+
+Root endpoint: account -> /account/?
 
         POST -> account/register -> For create an account
             requirements body: keywords(Username, Password) = "test123", "pass123321".
