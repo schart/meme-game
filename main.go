@@ -2,7 +2,8 @@ package main
 
 import (
 	account "account/controllers"
-	memes "meme-uploader/controllers"
+	controllers_game "game/controllers"
+	controllers_meme "meme-uploader/controllers"
 	"net/http"
 	"os"
 	schemasMeme "shared-library/database/schemas"
@@ -15,22 +16,27 @@ func main() {
 
 	schemasMeme.MemeCreateTables()
 	schemasMeme.AccountCreateTables()
+	schemasMeme.GameCreateTables()
 
 	// Host endpoint services
 
-	http.HandleFunc("/meme/uploaders/text", memes.TextUploadController)
-	http.HandleFunc("/meme/uploaders/photo", memes.PhotoUploadController)
+	// r := mux.NewRouter() re-config with mux
+	http.HandleFunc("/meme/uploaders/text", controllers_meme.TextUploadController)
+	http.HandleFunc("/meme/uploaders/photo", controllers_meme.PhotoUploadController)
 
-	http.HandleFunc("/meme/items/text", memes.TextItemsController)
-	http.HandleFunc("/meme/items/photo", memes.PhotoItemsController)
+	http.HandleFunc("/meme/items/text/{count}", controllers_meme.TextItemsController)
+	http.HandleFunc("/meme/items/photo/{count}", controllers_meme.PhotoItemsController)
 
-	http.HandleFunc("/account/register", account.AccountRegister)
-	http.HandleFunc("/account/login", account.AccountLogin)
+	http.HandleFunc("/account/register", account.AccountRegisterController)
+	http.HandleFunc("/account/login", account.AccountLoginController)
+	http.HandleFunc("/account/logout", account.AccountLogoutController)
+
+	http.HandleFunc("/game/create-room", controllers_game.RoomCreateController)
+	http.HandleFunc("/game/join-room", controllers_game.JoinRoomController)
 
 	// Start rabbitmq queues
 	rabbitmq.QueueRabbitStart()
 
 	// Start server
-	// fmt.Printf("Server started on the %v:%v", os.Getenv("HOST"), os.Getenv("PORT"))
 	http.ListenAndServe(os.Getenv("HOST")+":"+os.Getenv("PORT"), nil)
 }

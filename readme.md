@@ -48,8 +48,7 @@
 
         rooms -> Table:
             We keep save the data of created room start data in this table.
-            And we will do authenticate of "Is there the room?"!
-                
+            And we will do authenticate of "Is there the room?"!        
       
             
 <br>
