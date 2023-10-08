@@ -1,9 +1,10 @@
 package utils
 
 import (
-	"encoding/json"
 	"net/http"
 	types "shared-library/types"
+
+	"github.com/goccy/go-json"
 )
 
 func NewResponse(ok bool, status int, message string, params []string) types.Response {

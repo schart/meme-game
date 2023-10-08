@@ -26,7 +26,8 @@
  
 
 **Database Information:**
-    
+
+<br>
     Account Database: 
 
 ![Alt text](diagrams/DB/account.png)
@@ -40,7 +41,7 @@
             And we will do authenticate of "Is account have a room?"!
 
 
-
+<br>
     Game Database:
 
 ![Alt text](diagrams/DB/game.png)
@@ -51,7 +52,7 @@
                 
       
             
-
+<br>
     Meme Database:
 
 ![Alt text](diagrams/DB/meme.png)

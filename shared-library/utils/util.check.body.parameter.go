@@ -16,7 +16,6 @@ func ParameterChecker(body url.Values, structure interface{}) error {
 
 		fieldName := structType.Field(i).Name
 		body := strings.TrimSpace(body.Get(fieldName))
-
 		if body == "" {
 			return fmt.Errorf("Error: Need field named the %v", fieldName)
 		}
