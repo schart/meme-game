@@ -9,7 +9,8 @@ var memeCursor *sql.DB
 
 func MemeTextTable() {
 	memeCursor = cursors.MemeCursorTurn()
-	memeCursor.Query(`
+
+	memeCursor.Exec(`
 		CREATE TABLE memeText (
 			id serial PRIMARY KEY,
 			text varchar(50) NOT NULL
@@ -21,10 +22,11 @@ func MemeTextTable() {
 
 func MemePhotoTable() {
 	memeCursor = cursors.MemeCursorTurn()
-	memeCursor.Query(`
+
+	memeCursor.Exec(`
 		CREATE TABLE memePhoto (
 			id serial PRIMARY KEY,
-			photoId varchar(60)
+			photoid varchar(60)
 		)
 	`)
 

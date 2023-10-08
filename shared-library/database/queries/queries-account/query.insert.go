@@ -5,14 +5,16 @@ import (
 	cursors "shared-library/utils"
 )
 
-func AccountInsert(username, password string) error {
-	accountCursor = cursors.AccountCursorTurn()
+func AccountInsert(username, password string) (int, error) {
+	accountCursor := cursors.AccountCursorTurn()
 
-	_, err := accountCursor.Query(`INSERT INTO public.account(username, password) VALUES ($1, $2);`, username, password)
+	// Add account and turn its id
+	row := accountCursor.QueryRow(`INSERT INTO public.account(username, password) VALUES ($1, $2) RETURNING id;`, username, password)
 
-	if err != nil {
-		return fmt.Errorf("Error: when insert account  %s", err)
+	var id int
+	if err := row.Scan(&id); err != nil {
+		return 0, fmt.Errorf("Error register: %s", err)
 	}
 
-	return nil
+	return id, nil
 }
