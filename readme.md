@@ -29,7 +29,7 @@
     
     Account Database: 
 
-![Alt text](diagrams/DB/account.png.png)
+![Alt text](diagrams/DB/account.png)
 
     accounts -> Table :
             We keep save the data of accounts information.
@@ -54,7 +54,7 @@
 
     Meme Database:
 
-![Alt text](../diagrams/DB/meme.png)
+![Alt text](diagrams/DB/meme.png)
         
         memeText -> Table: 
             Save data of text of meme.
