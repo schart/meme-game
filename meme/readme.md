@@ -14,8 +14,8 @@ Multiple data upload feature is currently disabled.
 
 Data can be saved in two ways - Users from pop-up endpoints. - Bots with an access token.
 
-Test and success controls:
-Endpoints:
+ 
+**Endpoints:**
 
         root endpoint: meme -> /meme/?
 
@@ -30,3 +30,7 @@ Endpoints:
 
         GET ->  meme/items/text -> For get text by count
             requirements url parameter: keywords(count) =  0,1,2,3,4...?.
+
+
+
+ 
