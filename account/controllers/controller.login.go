@@ -4,10 +4,9 @@ import (
 	"net/http"
 	accountQueries "shared-library/database/queries/queries-account"
 	"shared-library/interceptors"
-	myJwt "shared-library/jwt"
+	myjwt "shared-library/jwt"
 	accountTypes "shared-library/types/account"
 	"shared-library/utils"
-	"time"
 )
 
 func AccountLoginController(w http.ResponseWriter, r *http.Request) {
@@ -37,19 +36,20 @@ func AccountLoginController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check account
-	res, err := accountQueries.AccountOneGet(formData)
+	id, err := accountQueries.IsAccountValidated(formData)
 	if err != nil {
 		utils.HandleError(w, http.StatusExpectationFailed, err.Error())
 		return
 	}
 
-	if res == nil {
+	// Account not found
+	if id == 0 {
 		utils.HandleError(w, http.StatusUnauthorized, "Account not founded")
 		return
 	}
 
 	// Create token
-	token, err := myJwt.TokenCreate(formData.Get("Username"))
+	token, err := myjwt.CreateJWT(id)
 	if err != nil {
 		utils.HandleError(w, http.StatusExpectationFailed, err.Error())
 		return
@@ -57,12 +57,15 @@ func AccountLoginController(w http.ResponseWriter, r *http.Request) {
 
 	// Create cookie
 	cookie := &http.Cookie{
-		Name:    "token",
-		Value:   token,
-		Expires: time.Now().Add(24 * time.Hour), // change the time
+		Name:     "token",
+		Value:    token,
+		MaxAge:   315000101, //time.Now().Add(24 * time.Hour), // change the time,
+		HttpOnly: true,
+		Secure:   true,
 	}
 
 	// Publish the token
 	http.SetCookie(w, cookie)
 	utils.HandleSuccess(w, []string{})
+	return
 }

@@ -25,9 +25,11 @@ func AccountLogoutController(w http.ResponseWriter, r *http.Request) {
 
 	// Create cookie
 	cookie := &http.Cookie{
-		Name:  "token",
-		Value: "",
-		// Expires: <-time.Tick(0), // change the time
+		Name:     "token",
+		Value:    "",
+		MaxAge:   315000101, //time.Now().Add(24 * time.Hour), // change the time,
+		HttpOnly: true,
+		Secure:   true,
 	}
 
 	// Publish the token

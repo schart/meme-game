@@ -6,7 +6,6 @@ import (
 	myJwt "shared-library/jwt"
 	accountTypes "shared-library/types/account"
 	"shared-library/utils"
-	"time"
 )
 
 func AccountRegisterController(w http.ResponseWriter, r *http.Request) {
@@ -30,14 +29,14 @@ func AccountRegisterController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create account
-	err = accountQueries.AccountInsert(formData.Get("Username"), formData.Get("Password"))
+	id, err := accountQueries.AccountInsert(formData.Get("Username"), formData.Get("Password"))
 	if err != nil {
 		utils.HandleError(w, http.StatusExpectationFailed, err.Error())
 		return
 	}
 
 	// Create token
-	token, err := myJwt.TokenCreate(formData.Get("Username"))
+	token, err := myJwt.CreateJWT(id)
 	if err != nil {
 		utils.HandleError(w, http.StatusExpectationFailed, err.Error())
 		return
@@ -45,12 +44,15 @@ func AccountRegisterController(w http.ResponseWriter, r *http.Request) {
 
 	// Create cookie
 	cookie := &http.Cookie{
-		Name:    "token",
-		Value:   token,
-		Expires: time.Now().Add(24 * time.Hour), // change the time
+		Name:     "token",
+		Value:    token,
+		MaxAge:   315000101, //time.Now().Add(24 * time.Hour), // change the time,
+		HttpOnly: true,
+		Secure:   true,
 	}
 
 	// Publish the token
 	http.SetCookie(w, cookie)
 	utils.HandleSuccess(w, []string{})
+	return
 }
