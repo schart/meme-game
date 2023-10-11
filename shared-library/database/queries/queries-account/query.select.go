@@ -7,6 +7,61 @@ import (
 	cursors "shared-library/utils"
 )
 
+// Get room of account
+func GetRoomOfAccount(accountId float64) []struct {
+	id        int
+	accountid float64
+	roomid    int
+	is_owner  bool
+} {
+	accountCursor := cursors.AccountCursorTurn()
+
+	rows, err := accountCursor.Query(`
+        SELECT * FROM public.account_rooms 
+        WHERE accountid = $1`, accountId)
+
+	if err != nil {
+		fmt.Errorf("Error: ", err.Error())
+		return nil
+	}
+
+	rooms := make([]struct {
+		id        int
+		accountid float64
+		roomid    int
+		is_owner  bool
+	}, 0)
+
+	var accountid float64
+	var id, roomid int
+	var is_owner bool
+
+	for rows.Next() {
+		if err := rows.Scan(&id, &accountid, &roomid, &is_owner); err != nil {
+			if err == sql.ErrNoRows {
+				fmt.Errorf(err.Error())
+				return nil
+			}
+		}
+		// Add to struct data of keeped
+		room := struct {
+			id        int
+			accountid float64
+			roomid    int
+			is_owner  bool
+		}{
+			id:        id,
+			accountid: accountid,
+			roomid:    roomid,
+			is_owner:  is_owner,
+		}
+
+		rooms = append(rooms, room)
+	}
+
+	return rooms
+}
+
 // Auth account
 func IsAccountValidated(formData url.Values) (int, error) {
 	accountCursor := cursors.AccountCursorTurn()
