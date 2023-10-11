@@ -7,6 +7,10 @@
     POST -> game/room/join-room -> For join a room
         requirements body: RoomId
 
+    GET ->  game/items/rooms -> For get all rooms
+        requirements token: Access with access key
+
+
 **Create room:**
     Before creating the room, we check if the user has the token.
         We get the token from cookies, we check.
