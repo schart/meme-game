@@ -12,3 +12,6 @@ Root endpoint: account -> /account/?
 
         GET ->  account/logout -> For leave the system
             requirements token: You are must be logged in.
+
+        GET ->  account/items/room -> For get room of account
+            requirements token: You are must be logged in.
