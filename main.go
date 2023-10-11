@@ -30,9 +30,11 @@ func main() {
 	http.HandleFunc("/account/register", account.AccountRegisterController)
 	http.HandleFunc("/account/login", account.AccountLoginController)
 	http.HandleFunc("/account/logout", account.AccountLogoutController)
+	http.HandleFunc("/account/items/room", account.GetRoomAccountController)
 
 	http.HandleFunc("/game/create-room", controllers_game.RoomCreateController)
 	http.HandleFunc("/game/join-room", controllers_game.JoinRoomController)
+	http.HandleFunc("/game/items/rooms", controllers_game.GetAllRoomsController)
 
 	// Start rabbitmq queues
 	rabbitmq.QueueRabbitStart()
