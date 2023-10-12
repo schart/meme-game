@@ -34,6 +34,7 @@ func PhotoItemsController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get photos
 	rows, err := db_queries.PhotoGetByCount(countInt)
 	if err != nil {
 		utils.HandleError(w, http.StatusMethodNotAllowed, "Error: "+err.Error())
