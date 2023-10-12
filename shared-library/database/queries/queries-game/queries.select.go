@@ -5,32 +5,32 @@ import (
 	cursors "shared-library/utils"
 )
 
-// Check presence of room by id
-func IsThereRoom(id string) (bool, error) {
+// Check presence of room by id -> returing id
+func IsThereRoom(link string) (int, error) {
 	gameCursor := cursors.GameCursorTurn()
 
-	rows, err := gameCursor.Query("SELECT * FROM public.rooms WHERE id = $1", id)
+	rows, err := gameCursor.Query("SELECT * FROM public.rooms WHERE link = $1", link)
 	defer rows.Close()
 
 	if err != nil {
-		return false, err
+		return 0, err
 	}
 
-	var _id int
-	var accountid, link string
+	var id int
+	var accountid, _link string
 
 	for rows.Next() {
-		err := rows.Scan(&_id, &accountid, &link)
+		err := rows.Scan(&id, &accountid, &_link)
 		if err != nil {
-			return false, err
+			return 0, err
 		}
-		return true, nil
+		return id, nil
 
 	}
 
-	return false, nil
+	return 0, err
 }
- 
+
 // Get all room
 func GetAllRoom() []struct {
 	id        int
