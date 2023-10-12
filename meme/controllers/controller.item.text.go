@@ -4,6 +4,9 @@ import (
 	"net/http"
 	db_queries "shared-library/database/queries/queries-meme"
 	utils "shared-library/utils"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func TextItemsController(w http.ResponseWriter, r *http.Request) {
@@ -18,12 +21,21 @@ func TextItemsController(w http.ResponseWriter, r *http.Request) {
 	utils.EnvLoader()
 
 	// Check count param in url parameters
-	count := r.URL.Query().Get("count")
+	count := mux.Vars(r)["count"]
 	if count == "" {
 		utils.HandleError(w, http.StatusMethodNotAllowed, "Count is needed for get the  records of texts")
 	}
 
-	rows, err := db_queries.TextGetByCount(count)
+	// Parse the `count` variable as an integer.
+	countInt, err := strconv.Atoi(count)
+
+	// Check if the `count` variable could be parsed as an integer.
+	if err != nil {
+		utils.HandleError(w, http.StatusBadRequest, "Count must be an integer")
+		return
+	}
+
+	rows, err := db_queries.TextGetByCount(countInt)
 	if err != nil {
 		utils.HandleError(w, http.StatusMethodNotAllowed, "Error when getting records")
 	}
