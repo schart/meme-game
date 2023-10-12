@@ -90,6 +90,6 @@ func RoomCreateController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.HandleSuccess(w, []string{})
+	utils.HandleSuccess(w, []string{id.String()})
 	return
 }
