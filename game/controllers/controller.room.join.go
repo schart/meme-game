@@ -74,15 +74,15 @@ func JoinRoomController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Presence of room
-	room, err := queries_game.IsThereRoom(formData.Get("RoomId"))
+	roomId, err := queries_game.IsThereRoom(formData.Get("RoomLink"))
 	if err != nil {
 		utils.HandleError(w, http.StatusBadGateway, err.Error())
 		return
 	}
 
 	// If not any record
-	if room == false {
-		utils.HandleError(w, http.StatusBadGateway, "Room not found: "+formData.Get("RoomId"))
+	if roomId == 0 {
+		utils.HandleError(w, http.StatusBadGateway, "Room not found: "+formData.Get("RoomLink"))
 		return
 	}
 
@@ -102,7 +102,7 @@ func JoinRoomController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Join room
-	err = queries_game.RoomJoin(accountId, formData.Get("RoomId"), false)
+	err = queries_game.RoomJoin(accountId, roomId, false)
 	if err != nil {
 		fmt.Println(err)
 		utils.HandleError(w, http.StatusBadRequest, err.Error())
