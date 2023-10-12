@@ -35,10 +35,12 @@ func TextItemsController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get texts
 	rows, err := db_queries.TextGetByCount(countInt)
 	if err != nil {
 		utils.HandleError(w, http.StatusMethodNotAllowed, "Error when getting records")
 	}
+
 	utils.HandleSuccess(w, rows)
 	return
 }
