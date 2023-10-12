@@ -9,6 +9,8 @@ import (
 	schemasMeme "shared-library/database/schemas"
 	"shared-library/rabbitmq"
 	"shared-library/utils"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -20,25 +22,29 @@ func main() {
 
 	// Host endpoint services
 
-	// r := mux.NewRouter() re-config with mux
-	http.HandleFunc("/meme/uploaders/text", controllers_meme.TextUploadController)
-	http.HandleFunc("/meme/uploaders/photo", controllers_meme.PhotoUploadController)
+	// Create a new mux router.
+	r := mux.NewRouter()
 
-	http.HandleFunc("/meme/items/text/{count}", controllers_meme.TextItemsController)
-	http.HandleFunc("/meme/items/photo/{count}", controllers_meme.PhotoItemsController)
+	// Register each route with the mux router.
+	r.HandleFunc("/meme/uploaders/text", controllers_meme.TextUploadController)
+	r.HandleFunc("/meme/uploaders/photo", controllers_meme.PhotoUploadController)
 
-	http.HandleFunc("/account/register", account.AccountRegisterController)
-	http.HandleFunc("/account/login", account.AccountLoginController)
-	http.HandleFunc("/account/logout", account.AccountLogoutController)
-	http.HandleFunc("/account/items/room", account.GetRoomAccountController)
+	// Edit here meme routers
+	r.HandleFunc("/meme/items/text/{count}", controllers_meme.TextItemsController)
+	r.HandleFunc("/meme/items/photo/{count}", controllers_meme.PhotoItemsController)
 
-	http.HandleFunc("/game/create-room", controllers_game.RoomCreateController)
-	http.HandleFunc("/game/join-room", controllers_game.JoinRoomController)
-	http.HandleFunc("/game/items/rooms", controllers_game.GetAllRoomsController)
+	r.HandleFunc("/account/register", account.AccountRegisterController)
+	r.HandleFunc("/account/login", account.AccountLoginController)
+	r.HandleFunc("/account/logout", account.AccountLogoutController)
+	r.HandleFunc("/account/items/room", account.GetRoomAccountController)
+
+	r.HandleFunc("/game/create-room", controllers_game.RoomCreateController)
+	r.HandleFunc("/game/join-room", controllers_game.JoinRoomController)
+	r.HandleFunc("/game/items/rooms", controllers_game.GetAllRoomsController)
 
 	// Start rabbitmq queues
 	rabbitmq.QueueRabbitStart()
 
 	// Start server
-	http.ListenAndServe(os.Getenv("HOST")+":"+os.Getenv("PORT"), nil)
+	http.ListenAndServe(os.Getenv("HOST")+":"+os.Getenv("PORT"), r)
 }
