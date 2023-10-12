@@ -32,7 +32,7 @@
 
     account_rooms -> Table:
             We keep save the data of ownership information.
-            And we will do authenticate of "Is account have a room?"!
+            And we will do authenticate of "Is account joined a room?"!
 
 
 <br>
@@ -42,7 +42,7 @@
 
         rooms -> Table:
             We keep save the data of created room start data in this table.
-            And we will do authenticate of "Is there the room?"!        
+            And we will do authenticate of "Is there the room and Is account have a room?"!        
       
             
 <br>
