@@ -5,7 +5,7 @@ import (
 	cursors "shared-library/utils"
 )
 
-func PhotoGetByCount(count string) ([]string, error) {
+func PhotoGetByCount(count int) ([]string, error) {
 	memeCursor = cursors.MemeCursorTurn()
 	rows, err := memeCursor.Query(`SELECT * FROM public.memephoto LIMIT $1;`, count)
 	if err != nil {
@@ -31,7 +31,7 @@ func PhotoGetByCount(count string) ([]string, error) {
 	return results, nil
 }
 
-func TextGetByCount(count string) ([]string, error) {
+func TextGetByCount(count int) ([]string, error) {
 	memeCursor = cursors.MemeCursorTurn()
 	rows, err := memeCursor.Query(`SELECT * FROM public.memetext LIMIT $1;`, count)
 
