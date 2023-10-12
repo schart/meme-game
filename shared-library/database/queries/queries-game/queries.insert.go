@@ -19,7 +19,7 @@ func RoomInsert(accountId float64, link uuid.UUID) error {
 		return err
 	}
 
-	var roomid string
+	var roomid int
 	for rows.Next() {
 
 		err := rows.Scan(&roomid)
@@ -38,7 +38,7 @@ func RoomInsert(accountId float64, link uuid.UUID) error {
 	return nil
 }
 
-func RoomJoin(accountId float64, roomId string, is_owner bool) error {
+func RoomJoin(accountId float64, roomId int, is_owner bool) error {
 	accountCursor := cursors.AccountCursorTurn()
 
 	tx, err := accountCursor.Begin()
