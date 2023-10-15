@@ -140,3 +140,63 @@ func IsHaveARoomAccount(accountId float64) (bool, error) {
 
 	return false, nil
 }
+
+// Check room is own the of room
+func IsAccountOwnerRoom(accountId int) (bool, error) {
+	accountCursor := cursors.AccountCursorTurn()
+	fmt.Println(accountId) // 1
+
+	rows, err := accountCursor.Query("SELECT * FROM public.account_rooms WHERE accountid = $1", accountId)
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+
+	var id, accountid, roomid int
+	var is_owner bool
+
+	for rows.Next() {
+		err := rows.Scan(&id, &accountid, &roomid, &is_owner)
+		if err != nil {
+			return false, err
+		}
+
+	}
+
+	fmt.Println("is own", is_owner)
+	if is_owner == true {
+		return true, nil
+	}
+	return false, nil
+}
+
+// How much there user in the room ?
+func CheckMinAccountInRoom(roomId int) (int, error) {
+	accountCursor := cursors.AccountCursorTurn()
+
+	rows, err := accountCursor.Query("SELECT * FROM public.account_rooms WHERE roomid = $1", roomId)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	var id, accountid, roomid int
+	var is_owner bool
+
+	counter := 0
+
+	for rows.Next() {
+		err := rows.Scan(&id, &accountid, &roomid, &is_owner)
+		if err != nil {
+			return 0, err
+		}
+		counter += 1
+	}
+
+	fmt.Println("counter: ", counter)
+	if counter < 0 {
+		return 0, nil
+	}
+
+	return counter, nil
+}
