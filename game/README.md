@@ -11,7 +11,7 @@
         requirements token: Access with access key
 
     Web Socket start with GET ->  game/start -> For start game
-        requirements token: Access with access key
+        requirements url parameter: room link
 
 
 **Create room:**
