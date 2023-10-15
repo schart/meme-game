@@ -11,8 +11,6 @@ import (
 )
 
 func RoomCreateController(w http.ResponseWriter, r *http.Request) {
-	// -> Start http conn
-	// This http connection 'll may be change with ws conn
 	w.Header().Set("Content-Type", "text/plain")
 
 	// Check method
@@ -21,7 +19,6 @@ func RoomCreateController(w http.ResponseWriter, r *http.Request) {
 		utils.HandleError(w, http.StatusMethodNotAllowed, "Method error expected method "+http.MethodPost)
 		return
 	}
-	// -> End http conn
 
 	/*
 		// Get token

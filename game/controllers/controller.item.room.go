@@ -8,9 +8,7 @@ import (
 )
 
 func GetAllRoomsController(w http.ResponseWriter, r *http.Request) {
-	// -> Start http conn
-	// This http connection 'll may be change with ws conn
-	w.Header().Set("Content-Type", "text/plain")
+ 	w.Header().Set("Content-Type", "text/plain")
 
 	// Check method
 	checkMethod := utils.HttpMethodSet(http.MethodGet, r)
