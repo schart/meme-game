@@ -29,7 +29,6 @@ func main() {
 	r.HandleFunc("/meme/uploaders/text", controllers_meme.TextUploadController)
 	r.HandleFunc("/meme/uploaders/photo", controllers_meme.PhotoUploadController)
 
-	// Edit here meme routers
 	r.HandleFunc("/meme/items/text/{count}", controllers_meme.TextItemsController)
 	r.HandleFunc("/meme/items/photo/{count}", controllers_meme.PhotoItemsController)
 
@@ -41,6 +40,7 @@ func main() {
 	r.HandleFunc("/game/create-room", controllers_game.RoomCreateController)
 	r.HandleFunc("/game/join-room", controllers_game.JoinRoomController)
 	r.HandleFunc("/game/items/rooms", controllers_game.GetAllRoomsController)
+	r.HandleFunc("/game/start-game/{room_link}", controllers_game.StartGameController)
 
 	// Start rabbitmq queues
 	rabbitmq.QueueRabbitStart()
