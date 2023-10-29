@@ -50,3 +50,51 @@
 
         memePhoto -> Table: 
             Save data of photo of meme.
+
+
+
+**Cache Information:**
+    We keep live data when player plays the game. 
+    
+    
+    Account Cache:
+
+![Alt text](diagrams/Cache/Account%20cache.png)
+
+        The account cache can be accessed with the account:<id> key in redis cli.
+
+        And we can checker like:
+            votes -> How much votes player have?
+            cards ->  How many cards does the player have?
+            referee_status -> is player refere?
+
+<br>
+
+    Room Cache:
+
+![Alt text](diagrams/Cache/Room%20cache.png)
+        The room cache can be accessed with the room:<id> key in redis cli.
+
+        And we can checker like:
+            room_link -> What is link of room?
+            ownerId -> Who is owner the  room?
+            count_user -> How much  players are in the room?
+
+
+<br>
+
+
+    Round Cache:
+
+![Alt text](diagrams/Cache/Round%20Cache.png)
+        The round cache can be accessed with the round:<id> key in redis cli.
+
+        And we can checker like:
+            round -> How many rounds are we in?
+            card_throwers -> Who are players did played a card?
+            referee_voted ->  is referee voted the round?
+            meme_text -> What is the text to this round?
+
+
+
+<br>
