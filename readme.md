@@ -60,7 +60,6 @@
     Account Cache:
 
 ![Alt text](diagrams/Cache/accountcache.png)
-
         The account cache can be accessed with the account:<id> key in redis cli.
 
         And we can checker like:
