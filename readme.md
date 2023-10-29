@@ -59,7 +59,7 @@
     
     Account Cache:
 
-![Alt text](diagrams/Cache/Account%20cache.png)
+![Alt text](diagrams/Cache/Accountcache.png)
 
         The account cache can be accessed with the account:<id> key in redis cli.
 
@@ -72,7 +72,7 @@
 
     Room Cache:
 
-![Alt text](diagrams/Cache/Room%20cache.png)
+![Alt text](diagrams/Cache/Roomcache.png)
         The room cache can be accessed with the room:<id> key in redis cli.
 
         And we can checker like:
@@ -86,7 +86,7 @@
 
     Round Cache:
 
-![Alt text](diagrams/Cache/Round%20Cache.png)
+![Alt text](diagrams/Cache/Roundcache.png)
         The round cache can be accessed with the round:<id> key in redis cli.
 
         And we can checker like:
