@@ -7,7 +7,7 @@ import (
 	"github.com/goccy/go-json"
 )
 
-func NewResponse(ok bool, status int, message string, params any) types.Response {
+func NewResponse(ok bool, status int, message string, params map[string]interface{}) types.Response {
 	response := types.Response{
 		OK:      ok,
 		Status:  status,
@@ -20,12 +20,12 @@ func NewResponse(ok bool, status int, message string, params any) types.Response
 
 func HandleError(w http.ResponseWriter, statusCode int, errorMessage string) {
 	w.Header().Set("Content-Type", "application/json")
-	response := NewResponse(false, statusCode, errorMessage, []string{})
+	response := NewResponse(false, statusCode, errorMessage, map[string]interface{}{})
 	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(response)
 }
 
-func HandleSuccess(w http.ResponseWriter, params any) {
+func HandleSuccess(w http.ResponseWriter, params  map[string]interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	response := NewResponse(true, http.StatusOK, "Successfuly process ", params)
 	w.WriteHeader(http.StatusOK)
