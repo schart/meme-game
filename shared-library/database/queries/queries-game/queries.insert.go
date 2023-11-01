@@ -14,18 +14,12 @@ func RoomInsert(accountId float64, link uuid.UUID) error {
 		return err
 	}
 
-	rows, err := tx.Query(`INSERT INTO public.rooms(accountid, link) VALUES($1, $2) returning id`, accountId, link)
-	if err != nil {
-		return err
-	}
+	rows := tx.QueryRow(`INSERT INTO public.rooms(accountid, link) VALUES($1, $2) returning id`, accountId, link)
 
 	var roomid int
-	for rows.Next() {
-
-		err := rows.Scan(&roomid)
-		if err != nil {
-			return err
-		}
+	err = rows.Scan(&roomid)
+	if err != nil {
+		return err
 	}
 
 	err = RoomJoin(accountId, roomid, true)
@@ -46,7 +40,7 @@ func RoomJoin(accountId float64, roomId int, is_owner bool) error {
 		return err
 	}
 
-	_, err = tx.Exec("INSERT INTO public.account_rooms(accountid, roomid, is_owner) VALUES($1, $2, $3)", accountId, roomId, is_owner)
+	_, err = tx.Query("INSERT INTO public.account_rooms(accountid, roomid, is_owner) VALUES($1, $2, $3)", accountId, roomId, is_owner)
 	if err != nil {
 		tx.Rollback()
 		return err

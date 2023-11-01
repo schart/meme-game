@@ -9,34 +9,24 @@ import (
 func IsThereRoom(link string) (int, error) {
 	gameCursor := cursors.GameCursorTurn()
 
-	rows, err := gameCursor.Query("SELECT * FROM public.rooms WHERE link = $1", link)
-	defer rows.Close()
+	rows := gameCursor.QueryRow("SELECT id FROM public.rooms WHERE link = $1", link)
 
+	var id int
+
+	err := rows.Scan(&id)
 	if err != nil {
 		return 0, err
 	}
 
-	var id int
-	var accountid, _link string
-
-	for rows.Next() {
-		err := rows.Scan(&id, &accountid, &_link)
-		if err != nil {
-			return 0, err
-		}
-		return id, nil
-
+	if id == 0 {
+		return 0, nil
 	}
 
-	return 0, err
+	return id, nil
 }
 
 // Get all room
-func GetAllRoom() []struct {
-	id        int
-	accountId int
-	link      string
-} {
+func GetAllRoom() []interface{} {
 	gameCursor := cursors.GameCursorTurn()
 	rows, err := gameCursor.Query("SELECT * FROM public.rooms")
 
@@ -46,12 +36,8 @@ func GetAllRoom() []struct {
 
 	defer rows.Close()
 
-	// Use slice for keep data
-	rooms := make([]struct {
-		id        int
-		accountId int
-		link      string
-	}, 0)
+	var rooms []interface{}
+	var room map[string]interface{} = map[string]interface{}{}
 
 	for rows.Next() {
 		var id int
@@ -64,16 +50,9 @@ func GetAllRoom() []struct {
 			continue
 		}
 
-		// Add to struct data of keeped
-		room := struct {
-			id        int
-			accountId int
-			link      string
-		}{
-			id:        id,
-			accountId: accountid,
-			link:      link,
-		}
+		room["id"] = id
+		room["accountid"] = accountid
+		room["link"] = link
 
 		rooms = append(rooms, room)
 	}
