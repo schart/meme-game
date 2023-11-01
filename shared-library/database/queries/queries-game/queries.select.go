@@ -5,8 +5,14 @@ import (
 	cursors "shared-library/utils"
 )
 
-// Check presence of room by id -> returing id
-func IsThereRoom(link string) (int, error) {
+/*
+   @ Queries of rooms table
+   - Room available? via link
+   - Get all room.
+   - Get Room. via link
+*/
+
+func RoomAvailable(link string) bool {
 	gameCursor := cursors.GameCursorTurn()
 
 	rows := gameCursor.QueryRow("SELECT id FROM public.rooms WHERE link = $1", link)
@@ -15,17 +21,16 @@ func IsThereRoom(link string) (int, error) {
 
 	err := rows.Scan(&id)
 	if err != nil {
-		return 0, err
+		return false
 	}
 
 	if id == 0 {
-		return 0, nil
+		return false
 	}
 
-	return id, nil
+	return true
 }
 
-// Get all room
 func GetAllRoom() []interface{} {
 	gameCursor := cursors.GameCursorTurn()
 	rows, err := gameCursor.Query("SELECT * FROM public.rooms")
@@ -58,4 +63,27 @@ func GetAllRoom() []interface{} {
 	}
 
 	return rooms
+}
+
+func GetRoomByLink(roomLink string) map[string]interface{} {
+	gameCursor := cursors.GameCursorTurn()
+
+	row := gameCursor.QueryRow("SELECT * FROM public.rooms WHERE link = $1", roomLink)
+
+	var room map[string]interface{} = map[string]interface{}{}
+
+	var id int
+	var accountid int
+	var link string
+
+	err := row.Scan(&id, &accountid, &link)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	room["id"] = id
+	room["accountid"] = accountid
+	room["link"] = link
+
+	return room
 }
