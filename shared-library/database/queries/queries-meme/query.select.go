@@ -6,7 +6,13 @@ import (
 	"strconv"
 )
 
-func PhotoGetByCount(count int) map[string]interface{} {
+/*
+	@ Queries of meme photo
+	- Get Photo. Via count
+	- Photo/Card available? via information{cardid, accountid}
+*/
+
+func GetPhoto(count int) map[string]interface{} {
 	memeCursor = cursors.MemeCursorTurn()
 
 	rows, err := memeCursor.Query(`SELECT * FROM public.memephoto LIMIT $1;`, count)
@@ -40,7 +46,32 @@ func PhotoGetByCount(count int) map[string]interface{} {
 	return cards
 }
 
-func TextGetByCount(count int) map[string]interface{} {
+func PhotoAvailable(informations map[string]interface{}) bool {
+	memeCursor = cursors.MemeCursorTurn()
+
+	row := memeCursor.QueryRow(`SELECT id FROM public.memephoto WHERE photoid = $1;`, informations["cardId"])
+
+	var id int
+
+	err := row.Scan(&id)
+	if err != nil {
+		fmt.Errorf(err.Error())
+		return false
+	}
+
+	if id == 0 {
+		return false
+	}
+
+	return true
+}
+
+/*
+	@ Queries of meme text
+	- Get Text. Via count
+*/
+
+func GetText(count int) map[string]interface{} {
 	memeCursor = cursors.MemeCursorTurn()
 
 	rows, err := memeCursor.Query(`SELECT * FROM public.memetext LIMIT $1;`, count)
@@ -72,24 +103,4 @@ func TextGetByCount(count int) map[string]interface{} {
 	}
 
 	return cards
-}
-
-func IsTherePhoto(informations map[string]interface{}) bool {
-	memeCursor = cursors.MemeCursorTurn()
-
-	row := memeCursor.QueryRow(`SELECT id FROM public.memephoto WHERE photoid = $1;`, informations["cardId"])
-
-	var id int
-
-	err := row.Scan(&id)
-	if err != nil {
-		fmt.Errorf(err.Error())
-		return false
-	}
-
-	if id == 0 {
-		return false
-	}
-
-	return true
 }
