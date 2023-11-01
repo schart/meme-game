@@ -8,7 +8,7 @@ import (
 )
 
 func GetAllRoomsController(w http.ResponseWriter, r *http.Request) {
- 	w.Header().Set("Content-Type", "text/plain")
+	w.Header().Set("Content-Type", "text/plain")
 
 	// Check method
 	checkMethod := utils.HttpMethodSet(http.MethodGet, r)
@@ -25,6 +25,6 @@ func GetAllRoomsController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	room := queries_game.GetAllRoom()
-	utils.HandleSuccess(w, room)
+	utils.HandleSuccess(w, map[string]interface{}{"room": room})
 	return
 }

@@ -46,8 +46,6 @@ func RoomCreateController(w http.ResponseWriter, r *http.Request) {
 
 	accountId := float64(1) //  id 1 name heja
 
-	_ = queries_account.GetRoomOfAccount(accountId)
-
 	// Presence of Account
 	account, err := queries_account.IsThereAccount(accountId)
 	if err != nil {
@@ -87,6 +85,6 @@ func RoomCreateController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.HandleSuccess(w, []string{id.String()})
+	utils.HandleSuccess(w, map[string]interface{}{"id": id.String()})
 	return
 }
