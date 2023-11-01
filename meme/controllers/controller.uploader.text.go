@@ -46,5 +46,5 @@ func TextUploadController(w http.ResponseWriter, r *http.Request) {
 	// Receive text for upload to database
 	rabbitmq.ReceiveText("textq")
 
-	utils.HandleSuccess(w, []string{})
+	utils.HandleSuccess(w, map[string]interface{}{})
 }

@@ -42,5 +42,5 @@ func PhotoUploadController(w http.ResponseWriter, r *http.Request) {
 	// Receive and upload to db name of photo
 	rabbitmq.ReceivePhotoId("photoq")
 
-	utils.HandleSuccess(w, []string{})
+	utils.HandleSuccess(w, map[string]interface{}{})
 }
