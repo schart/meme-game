@@ -36,7 +36,7 @@ func TextItemsController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get texts
-	texts := db_queries.TextGetByCount(countInt)
+	texts := db_queries.GetText(countInt)
 
 	utils.HandleSuccess(w, map[string]interface{}{"texts": texts})
 	return

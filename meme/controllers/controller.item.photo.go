@@ -35,7 +35,7 @@ func PhotoItemsController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get photos
-	photos := db_queries.PhotoGetByCount(countInt)
+	photos := db_queries.GetPhoto(countInt)
 
 	utils.HandleSuccess(w, map[string]interface{}{
 		"photos": photos,

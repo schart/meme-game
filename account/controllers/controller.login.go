@@ -38,16 +38,14 @@ func AccountLoginController(w http.ResponseWriter, r *http.Request) {
 		@ Now, we check if the account is verified or unverified and finally we create and publish the jwt
 	*/
 
-	id, err := accountQueries.IsAccountValidated(formData)
-	if err != nil {
-		utils.HandleError(w, http.StatusExpectationFailed, err.Error())
-		return
-	}
-
-	if id == 0 {
+	status := accountQueries.AccountVerified(formData)
+	if status == false {
 		utils.HandleError(w, http.StatusUnauthorized, "Account not founded")
 		return
 	}
+
+	account := accountQueries.GetAccountViaUsername(formData.Get("Username"))
+	id := account["id"].(int)
 
 	token, err := myjwt.CreateJWT(id)
 	if err != nil {

@@ -43,37 +43,21 @@ func StartPlayController(w http.ResponseWriter, r *http.Request) {
 	accountId := float64(1)
 
 	// Presence of account
-	account, err := queries_account.IsThereAccount(accountId)
-	if err != nil {
-		utils.HandleErrorWS(conn, err.Error())
-		return
-	}
-
-	// account could not found
-	if account == nil {
-		utils.HandleErrorWS(conn, err.Error())
+	status = queries_account.AccountAvaliableViaId(accountId)
+	if status == false {
+		utils.HandleErrorWS(conn, "Account could not found")
 		return
 	}
 
 	// Presence of room
-	roomId, err := queries_game.IsThereRoom(room_link)
-	if err != nil {
-		utils.HandleErrorWS(conn, err.Error())
-		return
-	}
-
-	// If not any record
-	if roomId == 0 {
+	status = queries_game.RoomAvailable(room_link)
+	if status == false {
 		utils.HandleErrorWS(conn, "Room not found: "+room_link)
 		return
 	}
 
 	// If user owner of the room
-	status, err = queries_account.IsAccountOwnerRoom(int(accountId))
-	if err != nil {
-		utils.HandleErrorWS(conn, err.Error())
-		return
-	}
+	status = queries_account.AccountOwnerTheRoom(int(accountId))
 
 	// if account is does not owner of the room
 	if status == false {
@@ -81,12 +65,12 @@ func StartPlayController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get room via link
+	room := queries_game.GetRoomByLink(room_link)
+	roomId := room["id"].(int)
+
 	// How much there user in the room?
-	howAcc, err := queries_account.CheckMinAccountInRoom(roomId)
-	if err != nil {
-		utils.HandleErrorWS(conn, err.Error())
-		return
-	}
+	howAcc := queries_account.AccountCountInRoom(roomId)
 
 	if howAcc == 0 {
 		utils.HandleErrorWS(conn, "Min require 4 account")
@@ -98,7 +82,7 @@ func StartPlayController(w http.ResponseWriter, r *http.Request) {
 
 	// Create a  account game cache
 	for i := 0; i < len(accounts); i++ {
-		err = service_redis.CreateAccountCacheService(accounts[i])
+		err := service_redis.CreateAccountCacheService(accounts[i])
 		if err != nil {
 			utils.HandleErrorWS(conn, err.Error())
 			return
@@ -106,7 +90,7 @@ func StartPlayController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a room game cache
-	err = service_redis.CreateRoomCacheService(float64(roomId), room_link, howAcc, int(accountId))
+	err := service_redis.CreateRoomCacheService(float64(roomId), room_link, howAcc, int(accountId))
 	if err != nil {
 		utils.HandleErrorWS(conn, err.Error())
 		return

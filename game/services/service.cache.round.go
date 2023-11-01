@@ -31,7 +31,7 @@ func CreateRoundCacheService(roomId float64, room_link string) error {
 		return fmt.Errorf("Room is declared")
 	}*/
 
-	new_meme := queries_meme.TextGetByCount(1)
+	new_meme := queries_meme.GetText(1)
 
 	var card_throwers []string = []string{"0"}
 

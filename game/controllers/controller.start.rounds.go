@@ -52,7 +52,7 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 		roomOfAccount := queries_account.GetRoomOfAccount(float64(intAccountId))
 
 		fmt.Println("room: ", roomOfAccount, roomOfAccount["roomid"])
-		roomid := roomOfAccount["roomid"].(int)
+		roomid := roomOfAccount["id"].(int)
 
 		switch dataType {
 
@@ -74,7 +74,7 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 			*/
 
 			// Check presence of card/photo
-			presence := queries_meme.IsTherePhoto(data)
+			presence := queries_meme.PhotoAvailable(data)
 			if presence == false {
 				utils.HandleErrorWS(conn, "This card is not founded")
 				return

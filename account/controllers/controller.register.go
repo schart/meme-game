@@ -32,8 +32,8 @@ func AccountRegisterController(w http.ResponseWriter, r *http.Request) {
 
 	*/
 
-	status := queries.IsAccountThereUsername(formData.Get("Username"))
-	if status == true {
+	account := queries.GetAccountViaUsername(formData.Get("Username"))
+	if account != nil {
 		utils.HandleError(w, http.StatusExpectationFailed, "Username is already using")
 		return
 	}

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	queries_account "shared-library/database/queries/queries-account"
 	queries_game "shared-library/database/queries/queries-game"
@@ -47,29 +46,15 @@ func RoomCreateController(w http.ResponseWriter, r *http.Request) {
 	accountId := float64(1) //  id 1 name heja
 
 	// Presence of Account
-	account, err := queries_account.IsThereAccount(accountId)
-	if err != nil {
-		fmt.Println(err)
-		utils.HandleError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	// Owner could not found
-	if (account == nil) == true {
+	status := queries_account.AccountAvaliableViaId(accountId)
+	if status == false {
 		utils.HandleError(w, http.StatusBadRequest, "Account could not found")
 		return
 	}
 
 	// Check user have a room or joined a room
-	statusRoom, err := queries_account.IsHaveARoomAccount(accountId)
-	if err != nil {
-		fmt.Println(err)
-		utils.HandleError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	// If joined a room
-	if statusRoom == true {
+	status = queries_account.AccountHaveTheRoom(accountId)
+	if status == true {
 		utils.HandleError(w, http.StatusBadRequest, "You already joined a room")
 		return
 	}
@@ -78,9 +63,8 @@ func RoomCreateController(w http.ResponseWriter, r *http.Request) {
 	id, _ := uuid.NewV4()
 
 	// Create room
-	err = queries_game.RoomInsert(accountId, id)
+	err := queries_game.RoomInsert(accountId, id)
 	if err != nil {
-		fmt.Println(err)
 		utils.HandleError(w, http.StatusBadRequest, err.Error())
 		return
 	}

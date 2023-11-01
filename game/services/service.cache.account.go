@@ -28,7 +28,7 @@ func CreateAccountCacheService(accountId float64) error {
 		return fmt.Errorf("This account is playing now")
 	}*/
 
-	cards := queries_meme.PhotoGetByCount(5)
+	cards := queries_meme.GetPhoto(5)
 
 	// Convert the []string slice to a JSON string.
 	jsonCards, err := json.Marshal(cards)

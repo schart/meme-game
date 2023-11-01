@@ -48,6 +48,8 @@ func JoinRoomController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	roomLink := formData.Get("RoomLink")
+
 	/*// Get account id in jwt
 	claims, err := myjwt.DecodeJWT(token)
 	if err != nil {
@@ -61,45 +63,29 @@ func JoinRoomController(w http.ResponseWriter, r *http.Request) {
 	accountId := float64(2)
 
 	// Presence of account
-	account, err := queries_account.IsThereAccount(accountId)
-	if err != nil {
-		utils.HandleError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	// account could not found
-	if account == nil {
+	status := queries_account.AccountAvaliableViaId(accountId)
+	if status == false {
 		utils.HandleError(w, http.StatusBadRequest, "Account could not found")
 		return
 	}
 
 	// Presence of room
-	roomId, err := queries_game.IsThereRoom(formData.Get("RoomLink"))
-	if err != nil {
-		utils.HandleError(w, http.StatusBadGateway, err.Error())
-		return
-	}
-
-	// If not any record
-	if roomId == 0 {
-		utils.HandleError(w, http.StatusBadGateway, "Room not found: "+formData.Get("RoomLink"))
+	status = queries_game.RoomAvailable(roomLink)
+	if status == false {
+		utils.HandleError(w, http.StatusBadRequest, "Room not found: "+roomLink)
 		return
 	}
 
 	// Check user have a room or joined a room
-	statusRoom, err := queries_account.IsHaveARoomAccount(accountId)
-	if err != nil {
-		fmt.Println(err)
-		utils.HandleError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	// If joined a room
-	if statusRoom == true {
+	status = queries_account.AccountHaveTheRoom(accountId)
+	if status == true {
 		fmt.Println(err)
 		utils.HandleError(w, http.StatusBadRequest, "Just one room, you can create/join")
 		return
 	}
+
+	room := queries_game.GetRoomByLink(roomLink)
+	roomId := room["id"].(int)
 
 	// Join room
 	err = queries_game.RoomJoin(accountId, roomId, false)
