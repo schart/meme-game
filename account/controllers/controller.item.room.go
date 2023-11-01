@@ -47,6 +47,6 @@ func GetRoomAccountController(w http.ResponseWriter, r *http.Request) {
 	accountId := float64(1)
 
 	rooms := queries_account.GetRoomOfAccount(accountId)
-	utils.HandleSuccess(w, rooms)
+	utils.HandleSuccess(w, map[string]interface{}{"rooms": rooms})
 	return
 }

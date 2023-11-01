@@ -34,6 +34,6 @@ func AccountLogoutController(w http.ResponseWriter, r *http.Request) {
 
 	// Publish the token
 	http.SetCookie(w, cookie)
-	utils.HandleSuccess(w, []string{})
+	utils.HandleSuccess(w, map[string]interface{}{})
 	return
 }

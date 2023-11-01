@@ -11,6 +11,7 @@ import (
 
 func AccountLoginController(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
+
 	// Check method
 	checkMethod := utils.HttpMethodSet(http.MethodPost, r)
 	if checkMethod != true {
@@ -66,6 +67,6 @@ func AccountLoginController(w http.ResponseWriter, r *http.Request) {
 
 	// Publish the token
 	http.SetCookie(w, cookie)
-	utils.HandleSuccess(w, []string{})
+	utils.HandleSuccess(w, map[string]interface{}{})
 	return
 }
