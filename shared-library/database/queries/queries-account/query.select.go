@@ -7,7 +7,93 @@ import (
 	cursors "shared-library/utils"
 )
 
-// Get room of account
+/*
+	@ Queries of Account table
+
+	- Get account. via username
+	- Account verified or unverified?
+	- Account available? via username
+	- Account available? via id
+*/
+
+func GetAccountViaUsername(_username string) map[string]interface{} {
+	accountCursor := cursors.AccountCursorTurn()
+	row := accountCursor.QueryRow(`SELECT * FROM public.account WHERE username = $1`, _username)
+
+	var id int
+	var username, password string
+
+	err := row.Scan(&id, &username, &password)
+	if err != nil {
+		return nil
+	}
+
+	if id == 0 {
+		return nil
+	}
+
+	room := map[string]interface{}{}
+
+	room["id"] = id
+	room["username"] = username
+	room["password"] = password
+
+	return room
+}
+
+func AccountAvaliableViaId(accountId float64) bool {
+	accountCursor := cursors.AccountCursorTurn()
+
+	row := accountCursor.QueryRow(`SELECT id FROM public.account WHERE id = $1`, accountId)
+
+	var id int
+	err := row.Scan(&id)
+	if err != nil {
+		fmt.Println(err)
+		return false
+	}
+
+	fmt.Println(id)
+
+	if id == 0 {
+		return false
+	}
+
+	return true
+}
+
+func AccountVerified(formData url.Values) bool {
+	accountCursor := cursors.AccountCursorTurn()
+
+	row := accountCursor.QueryRow(`
+        SELECT id FROM public.account 
+        WHERE username = $1 and password = $2`, formData.Get("Username"), formData.Get("Password"))
+
+	var id int
+
+	if err := row.Scan(&id); err != nil {
+		if err == sql.ErrNoRows {
+			return false
+		}
+	}
+
+	if id == 0 {
+		return false
+	}
+
+	return true
+}
+
+/*
+
+	@ Queries of Account rooms table
+	- Get room of account. via id
+	- Account have the room? via id
+	- Account owner the room? via id
+	- How much account in the room? via room id
+	- Get Accounts in Room. via roomid
+*/
+
 func GetRoomOfAccount(accountId float64) map[string]interface{} {
 	accountCursor := cursors.AccountCursorTurn()
 
@@ -35,49 +121,7 @@ func GetRoomOfAccount(accountId float64) map[string]interface{} {
 	return data
 }
 
-// Auth account
-func IsAccountValidated(formData url.Values) (int, error) {
-	accountCursor := cursors.AccountCursorTurn()
-
-	row := accountCursor.QueryRow(`
-        SELECT id FROM public.account 
-        WHERE username = $1 and password = $2`, formData.Get("Username"), formData.Get("Password"))
-
-	var id int
-
-	if err := row.Scan(&id); err != nil {
-		if err == sql.ErrNoRows {
-			return 0, nil
-		}
-		return 0, err
-	}
-
-	return id, nil
-}
-
-// For check presence account
-func IsThereAccount(accountId float64) (*sql.Row, error) {
-	accountCursor := cursors.AccountCursorTurn()
-
-	rows := accountCursor.QueryRow(`SELECT * FROM public.account  WHERE id = $1`, accountId)
-
-	var id int
-
-	err := rows.Scan(&id)
-	if err != nil {
-		fmt.Println(err)
-		return nil, nil
-	}
-
-	if id == 0 {
-		return nil, nil
-	}
-
-	return rows, nil
-}
-
-// Check presence of room by account id
-func IsHaveARoomAccount(accountId float64) (bool, error) {
+func AccountHaveTheRoom(accountId float64) bool {
 	accountCursor := cursors.AccountCursorTurn()
 
 	rows := accountCursor.QueryRow("SELECT id FROM public.account_rooms WHERE accountid = $1", accountId)
@@ -86,50 +130,42 @@ func IsHaveARoomAccount(accountId float64) (bool, error) {
 
 	err := rows.Scan(&id)
 	if err != nil {
-		return false, err
+		return false
 	}
 
 	if id == 0 {
-		return false, nil
+		return false
 	}
 
-	return true, nil
+	return true
 }
 
-// Check room is own the of room
-func IsAccountOwnerRoom(accountId int) (bool, error) {
+func AccountOwnerTheRoom(accountId int) bool {
 	accountCursor := cursors.AccountCursorTurn()
 
-	rows, err := accountCursor.Query("SELECT * FROM public.account_rooms WHERE accountid = $1", accountId)
-	if err != nil {
-		return false, err
-	}
-	defer rows.Close()
+	row := accountCursor.QueryRow("SELECT * FROM public.account_rooms WHERE accountid = $1", accountId)
 
 	var id, accountid, roomid int
 	var is_owner bool
 
-	for rows.Next() {
-		err := rows.Scan(&id, &accountid, &roomid, &is_owner)
-		if err != nil {
-			return false, err
-		}
-
+	err := row.Scan(&id, &accountid, &roomid, &is_owner)
+	if err != nil {
+		return false
 	}
 
 	if is_owner == true {
-		return true, nil
+		return true
 	}
-	return false, nil
+
+	return false
 }
 
-// How much there user in the room ?
-func CheckMinAccountInRoom(roomId int) (int, error) {
+func AccountCountInRoom(roomId int) int {
 	accountCursor := cursors.AccountCursorTurn()
 
 	rows, err := accountCursor.Query("SELECT id FROM public.account_rooms WHERE roomid = $1", roomId)
 	if err != nil {
-		return 0, err
+		return 0
 	}
 	defer rows.Close()
 
@@ -140,19 +176,18 @@ func CheckMinAccountInRoom(roomId int) (int, error) {
 	for rows.Next() {
 		err := rows.Scan(&id)
 		if err != nil {
-			return 0, err
+			return 0
 		}
 		counter += 1
 	}
 
 	if counter < 0 {
-		return 0, nil
+		return 0
 	}
 
-	return counter, nil
+	return counter
 }
 
-// Get account in the room with room link
 func GetAccountsInRoom(roomId int) []float64 {
 	accountCursor := cursors.AccountCursorTurn()
 
@@ -166,7 +201,6 @@ func GetAccountsInRoom(roomId int) []float64 {
 	}
 
 	accounts := []float64{}
-
 	var accountid float64
 
 	for rows.Next() {
@@ -182,27 +216,4 @@ func GetAccountsInRoom(roomId int) []float64 {
 	}
 
 	return accounts
-}
-
-// Is account there via username?
-func IsAccountThereUsername(username string) bool {
-	accountCursor := cursors.AccountCursorTurn()
-
-	/*
-		@ We can just take id in the query response for do efficent the query
-	*/
-	result := accountCursor.QueryRow("SELECT id FROM public.account WHERE username = $1", username)
-
-	var id int
-	err := result.Scan(&id)
-	if err != nil {
-		fmt.Println("Error when check presence account:  ", err.Error())
-		return false
-	}
-
-	if id == 0 {
-		return false
-	}
-
-	return true
 }
