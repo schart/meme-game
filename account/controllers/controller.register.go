@@ -40,7 +40,7 @@ func AccountRegisterController(w http.ResponseWriter, r *http.Request) {
 
 	/*
 		@ Finally we can create account, create token with its informations
-		@ And publish token as cookie
+		@ And publish token as cookie!
 	*/
 
 	id, err := accountQueries.AccountInsert(formData.Get("Username"), formData.Get("Password"))

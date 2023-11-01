@@ -7,19 +7,14 @@ import (
 )
 
 func GetRoomAccountController(w http.ResponseWriter, r *http.Request) {
-	// -> Start http conn
-	// This http connection 'll may be change with ws conn
 	w.Header().Set("Content-Type", "text/plain")
 
-	// Check method
 	checkMethod := utils.HttpMethodSet(http.MethodGet, r)
 	if checkMethod != true {
 		utils.HandleError(w, http.StatusMethodNotAllowed, "Method error expected method "+http.MethodPost)
 		return
 	}
-	// -> End http conn
 
-	// Check session
 	/*
 		// Get token
 		token, err := r.Cookie("token")
@@ -46,6 +41,11 @@ func GetRoomAccountController(w http.ResponseWriter, r *http.Request) {
 
 	accountId := float64(1)
 
+	/*
+		@ Checked session via jwt validation key
+		@ Finally we getting  account's room and turn these as reponse
+	*/
+	
 	rooms := queries_account.GetRoomOfAccount(accountId)
 	utils.HandleSuccess(w, map[string]interface{}{"rooms": rooms})
 	return

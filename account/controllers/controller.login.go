@@ -19,44 +19,42 @@ func AccountLoginController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check token
 	statusToken := interceptors.TokenCheck(w, r)
 	if statusToken == true {
 		utils.HandleError(w, http.StatusUnauthorized, "You already have a session")
 		return
 	}
 
-	// Get parsed body
 	formData := utils.ParsedBodyGet(w, r)
 
-	// Check body
 	err := utils.ParameterChecker(formData, accountTypes.AccountLogin{})
 	if err != nil {
 		utils.HandleError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	// Check account
+	/*
+		@ Checked body and authenticated parameter
+		@ Now, we check if the account is verified or unverified and finally we create and publish the jwt
+	*/
+
 	id, err := accountQueries.IsAccountValidated(formData)
 	if err != nil {
 		utils.HandleError(w, http.StatusExpectationFailed, err.Error())
 		return
 	}
 
-	// Account not found
 	if id == 0 {
 		utils.HandleError(w, http.StatusUnauthorized, "Account not founded")
 		return
 	}
 
-	// Create token
 	token, err := myjwt.CreateJWT(id)
 	if err != nil {
 		utils.HandleError(w, http.StatusExpectationFailed, err.Error())
 		return
 	}
 
-	// Create cookie
 	cookie := &http.Cookie{
 		Name:     "token",
 		Value:    token,
@@ -65,7 +63,6 @@ func AccountLoginController(w http.ResponseWriter, r *http.Request) {
 		Secure:   true,
 	}
 
-	// Publish the token
 	http.SetCookie(w, cookie)
 	utils.HandleSuccess(w, map[string]interface{}{})
 	return

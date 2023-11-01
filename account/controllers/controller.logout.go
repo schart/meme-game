@@ -9,21 +9,23 @@ import (
 func AccountLogoutController(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 
-	// Check method
 	checkMethod := utils.HttpMethodSet(http.MethodGet, r)
 	if checkMethod != true {
 		utils.HandleError(w, http.StatusMethodNotAllowed, "Method error expected method "+http.MethodPost)
 		return
 	}
 
-	// Check token, You are must be logged in.
 	statusToken := interceptors.TokenCheck(w, r)
 	if statusToken != true {
 		utils.HandleError(w, http.StatusUnauthorized, "You are already have not session")
 		return
 	}
 
-	// Create cookie
+	/*
+		@ Checked token for token there for do logout
+		@ Now, we doing logout by deleting the cookie of the in session
+	*/
+
 	cookie := &http.Cookie{
 		Name:     "token",
 		Value:    "",
@@ -32,7 +34,6 @@ func AccountLogoutController(w http.ResponseWriter, r *http.Request) {
 		Secure:   true,
 	}
 
-	// Publish the token
 	http.SetCookie(w, cookie)
 	utils.HandleSuccess(w, map[string]interface{}{})
 	return
