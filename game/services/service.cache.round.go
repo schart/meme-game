@@ -12,24 +12,27 @@ import (
 )
 
 func CreateRoundCacheService(roomId float64, room_link string) error {
-	/*
-		For keep dynamic data in round
-	*/
 	utils.EnvLoader()
 
-	// Create redis connections
 	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 	ctx := context.Background()
 
-	// Convert to string room id to use as redis key
-	strRoomtId := strconv.Itoa(int(roomId))
+	strRoomtId := "room:" + strconv.Itoa(int(roomId))
 
-	// Check room is declared
-	_ = client.HMGet(ctx, "room:"+strRoomtId, "meme_text").Val()
+	_ = client.HMGet(ctx, strRoomtId, "meme_text").Val()
 
-	/*if meme_text[0] != nil {
-		return fmt.Errorf("Room is declared")
-	}*/
+	/*
+		if meme_text[0] != nil {
+			return fmt.Errorf("Room is declared")
+		}
+	*/
+
+	/*
+
+		@ We, Connected to Redis, taken meme_text and check presence of room thanks to meme_text param in room cache.
+		@ Now, We Creating Round Cache.
+
+	*/
 
 	new_meme := queries_meme.GetText(1)
 
@@ -41,8 +44,9 @@ func CreateRoundCacheService(roomId float64, room_link string) error {
 		return fmt.Errorf("JSON marshaling error: %s", err.Error())
 	}
 
-	// Set the JSON string in Redis.
-	err = client.HMSet(ctx, "round:"+strRoomtId, map[string]interface{}{
+	roundKey := "round:" + strRoomtId
+
+	err = client.HMSet(ctx, roundKey, map[string]interface{}{
 		"round":         0,
 		"card_throwers": jsonThrowers,
 		"referee_voted": false,
@@ -56,23 +60,24 @@ func CreateRoundCacheService(roomId float64, room_link string) error {
 	return nil
 }
 
-// Is player thrown a card in this round?
-func IsPlayerThrownACardService(roomid int, data map[string]interface{}) bool {
+func PlayerThrownACardService(roomid int, data map[string]interface{}) bool {
 	utils.EnvLoader()
 
-	// Create redis connections
 	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 	ctx := context.Background()
 
-	// set round redis key
 	roundKey := "round:" + strconv.Itoa(int(roomid))
-
 	throwers := client.HGet(ctx, roundKey, "card_throwers").Val()
 
-	// for keep changed data
 	var newThrowers []string
 
-	// convert to json for storage in redis
+	/*
+
+		@ We, Connected to Redis, taken card_throwers
+		@ And checking account is played a card in this round.
+
+	*/
+
 	err := json.Unmarshal([]byte(throwers), &newThrowers)
 	if err != nil {
 		fmt.Println("JSON decode error:  ", err)
@@ -81,7 +86,6 @@ func IsPlayerThrownACardService(roomid int, data map[string]interface{}) bool {
 
 	accountid := data["accountId"]
 	for i := 0; i < len(newThrowers); i++ {
-		// If player thrown a card
 		if accountid == newThrowers[i] {
 			return true
 		}

@@ -16,30 +16,35 @@ func PhotoUploadController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Load enviroments
 	utils.EnvLoader()
 
-	// Check access key
 	presenceOfKey := interceptors.AccessKeyCheck(w, r)
 	if presenceOfKey == false {
 		utils.HandleError(w, http.StatusBadRequest, "Error: Required access key, check your 'access key'")
 		return
 	}
 
-	// Save file to disk
+	/*
+
+		@ We checked access key
+		@ Before, upload the photo by calling upload service
+
+	*/
+
 	err := memeService.PhotoUploadService(w, r)
 	if err != nil {
 		utils.HandleError(w, http.StatusBadRequest, "Error uploading file: "+err.Error())
 		return
 	}
 
-	// Get the renamed name
+	/*
+
+		@  Finally, rename file and sent to line up for saving to database
+
+	*/
+
 	renamedFileName := utils.RenamedVariableTurn()
-
-	// Send renamed file name for save to database
 	rabbitmq.SendMessage(renamedFileName, "photoq")
-
-	// Receive and upload to db name of photo
 	rabbitmq.ReceivePhotoId("photoq")
 
 	utils.HandleSuccess(w, map[string]interface{}{})

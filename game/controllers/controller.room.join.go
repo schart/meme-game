@@ -10,17 +10,13 @@ import (
 )
 
 func JoinRoomController(w http.ResponseWriter, r *http.Request) {
-	// -> Start http conn
-	// This http connection 'll may be change with ws conn
 	w.Header().Set("Content-Type", "text/plain")
 
-	// Check method
 	checkMethod := utils.HttpMethodSet(http.MethodPost, r)
 	if checkMethod != true {
 		utils.HandleError(w, http.StatusMethodNotAllowed, "Method error expected method "+http.MethodPost)
 		return
 	}
-	// -> End http conn
 
 	/*// Get token
 	token, err := r.Cookie("token")
@@ -38,18 +34,6 @@ func JoinRoomController(w http.ResponseWriter, r *http.Request) {
 	}
 	*/
 
-	// Parse body
-	formData := utils.ParsedBodyGet(w, r)
-
-	// Check body
-	err := utils.ParameterChecker(formData, types_game.JoinRoom{})
-	if err != nil {
-		utils.HandleError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	roomLink := formData.Get("RoomLink")
-
 	/*// Get account id in jwt
 	claims, err := myjwt.DecodeJWT(token)
 	if err != nil {
@@ -62,21 +46,33 @@ func JoinRoomController(w http.ResponseWriter, r *http.Request) {
 
 	accountId := float64(2)
 
-	// Presence of account
 	status := queries_account.AccountAvaliableViaId(accountId)
 	if status == false {
 		utils.HandleError(w, http.StatusBadRequest, "Account could not found")
 		return
 	}
 
-	// Presence of room
+	/*
+		@ Checked body, session and authenticated parameter and presence of account
+		@ Now, we parse the body and check the parameter, we also check the available room, has the account joined a room?
+	*/
+
+	formData := utils.ParsedBodyGet(w, r)
+
+	err := utils.ParameterChecker(formData, types_game.JoinRoom{})
+	if err != nil {
+		utils.HandleError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	roomLink := formData.Get("RoomLink")
+
 	status = queries_game.RoomAvailable(roomLink)
 	if status == false {
 		utils.HandleError(w, http.StatusBadRequest, "Room not found: "+roomLink)
 		return
 	}
 
-	// Check user have a room or joined a room
 	status = queries_account.AccountHaveTheRoom(accountId)
 	if status == true {
 		fmt.Println(err)
@@ -84,10 +80,15 @@ func JoinRoomController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	/*
+
+		@ Finally, join room
+
+	*/
+
 	room := queries_game.GetRoomByLink(roomLink)
 	roomId := room["id"].(int)
 
-	// Join room
 	err = queries_game.RoomJoin(accountId, roomId, false)
 	if err != nil {
 		fmt.Println(err)

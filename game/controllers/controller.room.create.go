@@ -45,24 +45,28 @@ func RoomCreateController(w http.ResponseWriter, r *http.Request) {
 
 	accountId := float64(1) //  id 1 name heja
 
-	// Presence of Account
 	status := queries_account.AccountAvaliableViaId(accountId)
 	if status == false {
 		utils.HandleError(w, http.StatusBadRequest, "Account could not found")
 		return
 	}
 
-	// Check user have a room or joined a room
+	/*
+		@ Checked account session and presence of wihch
+		@ Now, we checking account joined a room?
+	*/
+
 	status = queries_account.AccountHaveTheRoom(accountId)
 	if status == true {
 		utils.HandleError(w, http.StatusBadRequest, "You already joined a room")
 		return
 	}
 
-	// Create id for link
-	id, _ := uuid.NewV4()
+	/*
+		@ Finally, we creating room link as id and turn it
+	*/
 
-	// Create room
+	id, _ := uuid.NewV4()
 	err := queries_game.RoomInsert(accountId, id)
 	if err != nil {
 		utils.HandleError(w, http.StatusBadRequest, err.Error())

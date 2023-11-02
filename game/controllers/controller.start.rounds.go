@@ -15,7 +15,6 @@ import (
 func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 	conn := websocket_connect.Connect(w, r)
 
-	// check connection is websocket conn?
 	status := utils.CheckWebsocketConnection(r)
 	if status == false {
 		utils.HandleErrorWS(conn, "This connection is not web socket")
@@ -41,7 +40,6 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		// Process json data
 		dataType, ok := data["type"].(string)
 		if !ok {
 			utils.HandleErrorWS(conn, "Undefiend process type: "+dataType)
@@ -50,9 +48,14 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 
 		intAccountId, _ := strconv.Atoi(data["accountId"].(string))
 		roomOfAccount := queries_account.GetRoomOfAccount(float64(intAccountId))
-
-		fmt.Println("room: ", roomOfAccount, roomOfAccount["roomid"])
 		roomid := roomOfAccount["id"].(int)
+
+		/*
+
+			@ We was read stream of websocket connection and taken data by converted to GO lang objects
+			@ And was get room id thanks to account id of taken the websocket steram
+
+		*/
 
 		switch dataType {
 
@@ -62,8 +65,7 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 		*/
 
 		case "drop-card":
-			// Check player thrown a card
-			status := service_redis.IsPlayerThrownACardService(roomid, data)
+			status := service_redis.PlayerThrownACardService(roomid, data)
 			if status == true {
 				utils.HandleErrorWS(conn, "Played a card in this round!")
 				return
@@ -73,7 +75,6 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 				@ If player not played a card then we proceed
 			*/
 
-			// Check presence of card/photo
 			presence := queries_meme.PhotoAvailable(data)
 			if presence == false {
 				utils.HandleErrorWS(conn, "This card is not founded")
@@ -84,20 +85,19 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 				@ If card there proceed
 			*/
 
-			// Finally drop a card
 			err = service_redis.DropCardService(data, roomid)
 			if err != nil {
 				utils.HandleErrorWS(conn, err.Error())
 				return
 			}
 
-			// Turn the dropped card
 			utils.HandleSuccessWS(conn, map[string]interface{}{"dropped_card": data["cardId"]})
 
 		case "give-vote":
 			/*
 				@ Check the priorty of process
 			*/
+
 			fmt.Println(dataType)
 
 		default:

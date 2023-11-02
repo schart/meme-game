@@ -17,25 +17,26 @@ func TextItemsController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Load enviroments
 	utils.EnvLoader()
 
-	// Check count param in url parameters
 	count := mux.Vars(r)["count"]
 	if count == "" {
 		utils.HandleError(w, http.StatusMethodNotAllowed, "Count is needed for get the  records of texts")
 	}
 
-	// Parse the `count` variable as an integer.
 	countInt, err := strconv.Atoi(count)
-
-	// Check if the `count` variable could be parsed as an integer.
 	if err != nil {
 		utils.HandleError(w, http.StatusBadRequest, "Count must be an integer")
 		return
 	}
 
-	// Get texts
+	/*
+
+	  @ We taken params and converted needed data type to use
+	  @ Finally, taken texts in the database according to count
+
+	*/
+
 	texts := db_queries.GetText(countInt)
 
 	utils.HandleSuccess(w, map[string]interface{}{"texts": texts})

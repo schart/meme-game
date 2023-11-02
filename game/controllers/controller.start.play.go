@@ -14,14 +14,11 @@ import (
 func StartPlayController(w http.ResponseWriter, r *http.Request) {
 	conn := websocket_connect.Connect(w, r)
 
-	// check connection is websocket conn?
 	status := utils.CheckWebsocketConnection(r)
 	if status == false {
 		utils.HandleErrorWS(conn, "This connection is not web socket")
 		return
 	}
-
-	room_link := mux.Vars(r)["room_link"]
 
 	/*
 		// Get token
@@ -42,45 +39,59 @@ func StartPlayController(w http.ResponseWriter, r *http.Request) {
 
 	accountId := float64(1)
 
-	// Presence of account
 	status = queries_account.AccountAvaliableViaId(accountId)
 	if status == false {
 		utils.HandleErrorWS(conn, "Account could not found")
 		return
 	}
 
-	// Presence of room
+	/*
+		@ Checked account have a session and account is available?
+		@ Now, we check room available and account is owner of the room?
+	*/
+
+	room_link := mux.Vars(r)["room_link"]
+
 	status = queries_game.RoomAvailable(room_link)
 	if status == false {
 		utils.HandleErrorWS(conn, "Room not found: "+room_link)
 		return
 	}
 
-	// If user owner of the room
 	status = queries_account.AccountOwnerTheRoom(int(accountId))
 
-	// if account is does not owner of the room
 	if status == false {
 		utils.HandleErrorWS(conn, "Unauthorized")
 		return
 	}
 
-	// Get room via link
+	/*
+		@ Now, we getting room via link for check account count in the room
+	*/
+
 	room := queries_game.GetRoomByLink(room_link)
 	roomId := room["id"].(int)
 
-	// How much there user in the room?
 	howAcc := queries_account.AccountCountInRoom(roomId)
-
 	if howAcc == 0 {
 		utils.HandleErrorWS(conn, "Min require 4 account")
 		return
 	}
 
-	// Get accounts in the room
-	var accounts = queries_account.GetAccountsInRoom(roomId)
+	/*
 
-	// Create a  account game cache
+		@ Now, we getting accounts in the room.
+		@ Before, Create account cache for each account in the room.
+
+	*/
+
+	/*
+
+		@ Creating Room Cache
+
+	*/
+
+	var accounts = queries_account.GetAccountsInRoom(roomId)
 	for i := 0; i < len(accounts); i++ {
 		err := service_redis.CreateAccountCacheService(accounts[i])
 		if err != nil {
@@ -89,21 +100,33 @@ func StartPlayController(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Create a room game cache
+	/*
+		@ Creating Room Cache
+	*/
+
 	err := service_redis.CreateRoomCacheService(float64(roomId), room_link, howAcc, int(accountId))
 	if err != nil {
 		utils.HandleErrorWS(conn, err.Error())
 		return
 	}
 
-	// Create a round game cache
+	/*
+		@ Creating Round Cache
+	*/
+
 	err = service_redis.CreateRoundCacheService(float64(roomId), room_link)
 	if err != nil {
 		utils.HandleErrorWS(conn, err.Error())
 		return
 	}
 
-	// Start game
+	/*
+
+		@ Finally, we started a game session
+		@ Because those specifier of the started game
+
+	*/
+
 	utils.HandleSuccessWS(conn, map[string]interface{}{})
 	return
 }

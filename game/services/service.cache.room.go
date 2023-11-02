@@ -12,21 +12,26 @@ import (
 func CreateRoomCacheService(roomId float64, room_link string, playerCount, ownerId int) error {
 	utils.EnvLoader()
 
-	// Create redis connections
 	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 	ctx := context.Background()
 
-	// Convert to string room id to use as redis key
 	strRoomtId := strconv.Itoa(int(roomId))
 
-	// Check room is declared
 	_ = client.HMGet(ctx, "room:"+strRoomtId, "room_link").Val()
 
-	/*if link[0] != "" {
-		return fmt.Errorf("Room is declared")
-	}*/
+	/*
+		if link[0] != "" {
+			return fmt.Errorf("Room is declared")
+		}
+	*/
 
-	// Set the JSON string in Redis.
+	/*
+		@ We connected to Redis and taken room_link in the room cache with key
+		@ Also checked room link is there for check presence of room in room cache
+		@ Finally, we create a room in room cache
+
+	*/
+
 	err := client.HMSet(ctx, "room:"+strRoomtId, map[string]interface{}{
 		"room_link":  room_link,
 		"ownerId":    ownerId,

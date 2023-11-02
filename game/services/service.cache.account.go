@@ -14,30 +14,33 @@ import (
 func CreateAccountCacheService(accountId float64) error {
 	utils.EnvLoader()
 
-	// Create redis connections
 	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 	ctx := context.Background()
 
-	// Convert to string account id to use as redis key
-	strAccountId := strconv.Itoa(int(accountId))
+	accountKey := "account:" + strconv.Itoa(int(accountId))
 
-	// Check player is declared
-	_ = client.HGet(ctx, "account:"+strAccountId, "cards").Val()
+	_ = client.HGet(ctx, accountKey, "cards").Val()
 
-	/*if cardSlices != "" {
-		return fmt.Errorf("This account is playing now")
-	}*/
+	/*
+		if cardSlices != "" {
+			return fmt.Errorf("This account is playing now")
+		}
+	*/
+
+	/*
+
+		@ Connected redis and check account cache declared or un declared by getting card.
+		@ Now, we finally create cache of account.
+
+	*/
 
 	cards := queries_meme.GetPhoto(5)
-
-	// Convert the []string slice to a JSON string.
 	jsonCards, err := json.Marshal(cards)
 	if err != nil {
 		return fmt.Errorf("JSON marshaling error: %s", err.Error())
 	}
 
-	// Set the JSON string in Redis.
-	err = client.HSet(ctx, "account:"+strAccountId, map[string]interface{}{
+	err = client.HSet(ctx, accountKey, map[string]interface{}{
 		"votes":          0,
 		"cards":          jsonCards,
 		"referee_status": true,
@@ -53,84 +56,80 @@ func CreateAccountCacheService(accountId float64) error {
 func DropCardService(data map[string]interface{}, roomid int) error {
 	utils.EnvLoader()
 
-	// Create redis connections
 	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 	ctx := context.Background()
 
-	// Set account key
 	accountKey := "account:" + data["accountId"].(string)
 
-	// Get the cards of player
 	cards := client.HGet(ctx, accountKey, "cards").Val()
 
-	// for keep changed data
-	var newCards []string
 	if cards == "" {
 		return fmt.Errorf("Player have not a card")
 	}
 
-	//  converting to array via json
+	var newCards map[string]string
+
 	err := json.Unmarshal([]byte(cards), &newCards)
 	if err != nil {
-		return fmt.Errorf("JSON decode error:  ", err)
+		return fmt.Errorf(err.Error())
 	}
 
-	// Keep stayed cards
+	/*
+
+		@ Connected to Redis, getting cards and converted to GO LANG objects
+		@ Now, we keep other cards, except dropped card
+
+	*/
+
 	var stayedCards []string
 
-	// Delete card in card
 	for i := 0; i < len(newCards); i++ {
-		if newCards[i] == data["cardId"] {
-			fmt.Println("Dropped card: ", newCards[i])
+		cardkey := "card:" + strconv.Itoa(i)
+
+		if newCards[cardkey] == data["cardId"] {
+			fmt.Println("Dropped card: ", newCards[cardkey])
 		} else {
-			fmt.Println(newCards[i])
-			stayedCards = append(stayedCards, newCards[i])
+			fmt.Println(newCards[cardkey])
+			stayedCards = append(stayedCards, newCards[cardkey])
 		}
 	}
 
-	// Convert to json stayed cards array
 	json_stayed, err := json.Marshal(stayedCards)
 	if err != nil {
 		return fmt.Errorf("Json marshall error: ", err)
 	}
 
-	// Set new cards
 	err = client.HSet(ctx, accountKey, map[string]interface{}{
 		"cards": json_stayed,
 	}).Err()
+
 	if err != nil {
 		return fmt.Errorf("Redis HSet error: %s", err.Error())
 	}
 
 	/*
-
+		@ We kept the cards except for the dropped one and updated the cache
 		@ Let's add to the lineup of players who played cards in the round
 
 	*/
 
-	// Set redis access key
 	roundKey := "round:" + strconv.Itoa(roomid)
 
-	// Get the accounts the played a card
 	card_throwers := client.HGet(ctx, roundKey, "card_throwers").Val()
 
-	// Decode the stored json data
 	new_card_throwers := []string{}
 	err = json.Unmarshal([]byte(card_throwers), &new_card_throwers)
 	if err != nil {
 		return fmt.Errorf("Json Umarshal error: ", err)
 	}
 
-	// Add to throwers
 	new_card_throwers = append(new_card_throwers, data["accountId"].(string))
 
-	// Convert to json for storage in redis
 	json_throwers, err := json.Marshal(new_card_throwers)
 	if err != nil {
 		return fmt.Errorf("Json marshall error: ", err)
 	}
 
-	// Add new card throwers
 	err = client.HSet(ctx, roundKey, map[string]interface{}{
 		"card_throwers": string(json_throwers),
 	}).Err()
@@ -139,21 +138,34 @@ func DropCardService(data map[string]interface{}, roomid int) error {
 }
 
 // Update vote/score, if you take vote from other players this win value as +1
-func GiveVote(data map[string]interface{}) error {
+func GiveVoteService(data map[string]interface{}) error {
 	utils.EnvLoader()
 
 	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 	ctx := context.Background()
 
-	accountId := data["accountId"]
-	refere_status := client.HGet(ctx, fmt.Sprintf("account:%s", accountId), "refere_status").Val()
+	accountKey := "account:" + strconv.Itoa(data["accountId"].(int))
+
+	refere_status := client.HGet(ctx, accountKey, "refere_status").Val()
+
+	/*
+		@ We checked account is referee
+	*/
 
 	if refere_status == "true" {
-		votes := client.HGet(ctx, fmt.Sprintf("account:%s", data["affectedId"]), "votes").Val()
+		accountKey = "account:" + strconv.Itoa(data["affectedId"].(int))
+
+		votes := client.HGet(ctx, accountKey, "votes").Val()
 		convertedVotes, _ := strconv.Atoi(votes)
 
-		err := client.HSet(ctx, fmt.Sprintf("account:%s", data["affectedId"]), map[string]interface{}{
-			"votes": convertedVotes + 1}).Err()
+		/*
+
+			@ Note: AffecetId id own the given vote account by referee
+			@ We taken votes of affected account and re-save to cache by increment one
+
+		*/
+
+		err := client.HSet(ctx, accountKey, map[string]interface{}{"votes": convertedVotes + 1}).Err()
 		if err != nil {
 			return fmt.Errorf("Redis HSet error: %s", err.Error())
 		}

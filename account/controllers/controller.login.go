@@ -34,7 +34,7 @@ func AccountLoginController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/*
-		@ Checked body and authenticated parameter
+		@ Checked body, session and authenticated parameter
 		@ Now, we check if the account is verified or unverified and finally we create and publish the jwt
 	*/
 
