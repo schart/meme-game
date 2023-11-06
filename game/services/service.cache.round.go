@@ -17,9 +17,9 @@ func CreateRoundCacheService(roomId float64, room_link string) error {
 	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 	ctx := context.Background()
 
-	strRoomtId := "room:" + strconv.Itoa(int(roomId))
+	roomKey := "room:" + strconv.Itoa(int(roomId))
 
-	_ = client.HMGet(ctx, strRoomtId, "meme_text").Val()
+	_ = client.HMGet(ctx, roomKey, "meme_text").Val()
 
 	/*
 		if meme_text[0] != nil {
@@ -44,7 +44,7 @@ func CreateRoundCacheService(roomId float64, room_link string) error {
 		return fmt.Errorf("JSON marshaling error: %s", err.Error())
 	}
 
-	roundKey := "round:" + strRoomtId
+	roundKey := "round:" + strconv.Itoa(int(roomId))
 
 	err = client.HMSet(ctx, roundKey, map[string]interface{}{
 		"round":         0,
@@ -92,4 +92,31 @@ func PlayerThrownACardService(roomid int, data map[string]interface{}) bool {
 	}
 
 	return false
+}
+
+func ThrownCardService(roomid int) []string {
+	utils.EnvLoader()
+
+	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
+	ctx := context.Background()
+
+	roundKey := "round:" + strconv.Itoa(int(roomid))
+	throwers := client.HGet(ctx, roundKey, "card_throwers").Val()
+
+	var newThrowers []string
+
+	/*
+
+		@ We, Connected to Redis, taken card_throwers
+		@ And checking account is played a card in this round.
+
+	*/
+
+	err := json.Unmarshal([]byte(throwers), &newThrowers)
+	if err != nil {
+		fmt.Println("JSON decode error:  ", err)
+		return nil
+	}
+
+	return newThrowers
 }

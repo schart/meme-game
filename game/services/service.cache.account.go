@@ -9,6 +9,8 @@ import (
 	connection_redis "shared-library/redis"
 	utils "shared-library/utils"
 	"strconv"
+
+	types_game "shared-library/types/game"
 )
 
 func CreateAccountCacheService(accountId float64) error {
@@ -67,9 +69,9 @@ func DropCardService(data map[string]interface{}, roomid int) error {
 		return fmt.Errorf("Player have not a card")
 	}
 
-	var newCards map[string]string
+	var cardData types_game.CardData
 
-	err := json.Unmarshal([]byte(cards), &newCards)
+	err := json.Unmarshal([]byte(cards), &cardData)
 	if err != nil {
 		return fmt.Errorf(err.Error())
 	}
@@ -81,16 +83,30 @@ func DropCardService(data map[string]interface{}, roomid int) error {
 
 	*/
 
-	var stayedCards []string
+	var stayedCards map[string]interface{} = map[string]interface{}{}
 
-	for i := 0; i < len(newCards); i++ {
-		cardkey := "card:" + strconv.Itoa(i)
+	for i := 1; i <= 4; i++ {
+		var cardValue string
 
-		if newCards[cardkey] == data["cardId"] {
-			fmt.Println("Dropped card: ", newCards[cardkey])
-		} else {
-			fmt.Println(newCards[cardkey])
-			stayedCards = append(stayedCards, newCards[cardkey])
+		// Kartı CardData yapısından alın.
+		switch i {
+		case 1:
+			cardValue = cardData.Card1
+		case 2:
+			cardValue = cardData.Card2
+		case 3:
+			cardValue = cardData.Card3
+		case 4:
+			cardValue = cardData.Card4
+		}
+
+		if cardValue != "" {
+			if cardValue == data["cardId"] {
+				fmt.Println("Dropped card: ", cardValue)
+			} else {
+				stayedCards["card:"+strconv.Itoa(i)] = cardValue
+			}
+
 		}
 	}
 
@@ -117,6 +133,8 @@ func DropCardService(data map[string]interface{}, roomid int) error {
 
 	card_throwers := client.HGet(ctx, roundKey, "card_throwers").Val()
 
+	fmt.Println("card_throwers: ", card_throwers, roomid)
+
 	new_card_throwers := []string{}
 	err = json.Unmarshal([]byte(card_throwers), &new_card_throwers)
 	if err != nil {
@@ -124,7 +142,6 @@ func DropCardService(data map[string]interface{}, roomid int) error {
 	}
 
 	new_card_throwers = append(new_card_throwers, data["accountId"].(string))
-
 	json_throwers, err := json.Marshal(new_card_throwers)
 	if err != nil {
 		return fmt.Errorf("Json marshall error: ", err)
@@ -144,16 +161,17 @@ func GiveVoteService(data map[string]interface{}) error {
 	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 	ctx := context.Background()
 
-	accountKey := "account:" + strconv.Itoa(data["accountId"].(int))
+	accountKey := "account:" + data["accountId"].(string)
 
-	refere_status := client.HGet(ctx, accountKey, "refere_status").Val()
-
+	refere_status := client.HGet(ctx, accountKey, "referee_status").Val()
+	fmt.Println("")
 	/*
 		@ We checked account is referee
 	*/
 
-	if refere_status == "true" {
-		accountKey = "account:" + strconv.Itoa(data["affectedId"].(int))
+	if refere_status == "1" {
+		accountKey = "account:" + data["affectedId"].(string)
+		fmt.Println("account: ", refere_status)
 
 		votes := client.HGet(ctx, accountKey, "votes").Val()
 		convertedVotes, _ := strconv.Atoi(votes)

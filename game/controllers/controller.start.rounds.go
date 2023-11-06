@@ -98,6 +98,19 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 				@ Check the priorty of process
 			*/
 
+			thrownCardPlayer := service_redis.ThrownCardService(roomid)
+			if len(thrownCardPlayer) < 5 {
+				utils.HandleErrorWS(conn, "Each player must throw a card in round!")
+				return
+			}
+
+			
+
+			err := service_redis.GiveVoteService(data)
+			if err != nil {
+				utils.HandleErrorWS(conn, err.Error())
+			}
+
 			fmt.Println(dataType)
 
 		default:
