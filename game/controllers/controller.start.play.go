@@ -46,8 +46,10 @@ func StartPlayController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/*
+
 		@ Checked account have a session and account is available?
 		@ Now, we check room available and account is owner of the room?
+
 	*/
 
 	room_link := mux.Vars(r)["room_link"]
@@ -66,7 +68,9 @@ func StartPlayController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/*
+
 		@ Now, we getting room via link for check account count in the room
+
 	*/
 
 	room := queries_game.GetRoomByLink(room_link)

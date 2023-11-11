@@ -63,7 +63,9 @@ func RoomCreateController(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/*
+
 		@ Finally, we creating room link as id and turn it
+	
 	*/
 
 	id, _ := uuid.NewV4()

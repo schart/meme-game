@@ -36,7 +36,7 @@ func CreateRoundCacheService(roomId float64, room_link string) error {
 
 	new_meme := queries_meme.GetText(1)
 
-	var card_throwers []string = []string{"0"}
+	var card_throwers []string = []string{}
 
 	jsonThrowers, err := json.Marshal(card_throwers)
 	if err != nil {
@@ -67,6 +67,7 @@ func PlayerThrownACardService(roomid int, data map[string]interface{}) bool {
 	ctx := context.Background()
 
 	roundKey := "round:" + strconv.Itoa(int(roomid))
+	fmt.Println(roundKey)
 	throwers := client.HGet(ctx, roundKey, "card_throwers").Val()
 
 	var newThrowers []string
@@ -83,10 +84,11 @@ func PlayerThrownACardService(roomid int, data map[string]interface{}) bool {
 		fmt.Println("JSON decode error:  ", err)
 		return false
 	}
-
+	fmt.Println("new: ", newThrowers)
 	accountid := data["accountId"]
 	for i := 0; i < len(newThrowers); i++ {
 		if accountid == newThrowers[i] {
+			fmt.Println("test: ", accountid, newThrowers[i])
 			return true
 		}
 	}
@@ -119,4 +121,41 @@ func ThrownCardService(roomid int) []string {
 	}
 
 	return newThrowers
+}
+
+func DeleteThrownCardService(roomid int) error {
+
+	utils.EnvLoader()
+
+	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
+	ctx := context.Background()
+
+	roundKey := "round:" + strconv.Itoa(int(roomid))
+	err := client.HDel(ctx, roundKey, "card_throwers").Err()
+	if err != nil {
+		fmt.Println("[DeleteThrownCardService] ERROR: ", err)
+		return err
+	}
+
+	return nil
+}
+
+func IncrementRoundService(roomid int) error {
+
+	utils.EnvLoader()
+
+	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
+	ctx := context.Background()
+
+	roundKey := "round:" + strconv.Itoa(roomid)
+
+	round := client.HGet(ctx, roundKey, "round").Val()
+	convertedRound, _ := strconv.Atoi(round)
+
+	err := client.HSet(ctx, roundKey, map[string]interface{}{"round": convertedRound + 1}).Err()
+	if err != nil {
+		return fmt.Errorf("Redis HSet error: %s", err.Error())
+	}
+
+	return nil
 }

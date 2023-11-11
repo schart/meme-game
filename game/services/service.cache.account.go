@@ -155,7 +155,7 @@ func DropCardService(data map[string]interface{}, roomid int) error {
 }
 
 // Update vote/score, if you take vote from other players this win value as +1
-func GiveVoteService(data map[string]interface{}) error {
+func GiveVoteService(data map[string]interface{}, roomid int) error {
 	utils.EnvLoader()
 
 	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
@@ -164,14 +164,17 @@ func GiveVoteService(data map[string]interface{}) error {
 	accountKey := "account:" + data["accountId"].(string)
 
 	refere_status := client.HGet(ctx, accountKey, "referee_status").Val()
-	fmt.Println("")
+
 	/*
 		@ We checked account is referee
 	*/
 
 	if refere_status == "1" {
+		if data["affectedId"].(string) == data["accountId"].(string) {
+			return fmt.Errorf("A referee can not give vote him")
+		}
+
 		accountKey = "account:" + data["affectedId"].(string)
-		fmt.Println("account: ", refere_status)
 
 		votes := client.HGet(ctx, accountKey, "votes").Val()
 		convertedVotes, _ := strconv.Atoi(votes)
@@ -186,6 +189,11 @@ func GiveVoteService(data map[string]interface{}) error {
 		err := client.HSet(ctx, accountKey, map[string]interface{}{"votes": convertedVotes + 1}).Err()
 		if err != nil {
 			return fmt.Errorf("Redis HSet error: %s", err.Error())
+		}
+
+		err = client.HDel(ctx, "room:"+strconv.Itoa(roomid), "card_throwers").Err()
+		if err != nil {
+			return fmt.Errorf(err.Error())
 		}
 
 	} else {

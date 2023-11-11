@@ -48,7 +48,7 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 
 		intAccountId, _ := strconv.Atoi(data["accountId"].(string))
 		roomOfAccount := queries_account.GetRoomOfAccount(float64(intAccountId))
-		roomid := roomOfAccount["id"].(int)
+		roomid := roomOfAccount["roomid"].(int)
 
 		/*
 
@@ -95,23 +95,44 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 
 		case "give-vote":
 			/*
+
 				@ Check the priorty of process
+
 			*/
 
 			thrownCardPlayer := service_redis.ThrownCardService(roomid)
-			if len(thrownCardPlayer) < 5 {
+			if len(thrownCardPlayer) < 1 {
 				utils.HandleErrorWS(conn, "Each player must throw a card in round!")
 				return
 			}
 
-			
-
-			err := service_redis.GiveVoteService(data)
+			err := service_redis.GiveVoteService(data, roomid)
 			if err != nil {
 				utils.HandleErrorWS(conn, err.Error())
+				return
 			}
 
-			fmt.Println(dataType)
+			/*
+
+				@ We checked that each player played a card.
+				@ And we checked player is referee or  referee try to give vote self..
+				@ Finally, we delete thrown card and increment to round counter
+
+			*/
+
+			err = service_redis.DeleteThrownCardService(roomid)
+			if err != nil {
+				utils.HandleErrorWS(conn, err.Error())
+				return
+			}
+
+			err = service_redis.IncrementRoundService(roomid)
+			if err != nil {
+				utils.HandleErrorWS(conn, err.Error())
+				return
+			}
+
+			utils.HandleSuccessWS(conn, map[string]interface{}{"choosed_player": data["affectedId"]})
 
 		default:
 			fmt.Println("Undefiend process type:", dataType)
