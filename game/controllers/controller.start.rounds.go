@@ -138,6 +138,8 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 
 		default:
 			fmt.Println("Undefiend process type:", dataType)
+			utils.HandleErrorWS(conn, "Undefiend process type:"+dataType)
+			return
 		}
 	}
 
