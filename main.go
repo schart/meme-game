@@ -40,7 +40,10 @@ func main() {
 	r.HandleFunc("/game/create-room", controllers_game.RoomCreateController)
 	r.HandleFunc("/game/join-room", controllers_game.JoinRoomController)
 	r.HandleFunc("/game/items/rooms", controllers_game.GetAllRoomsController)
-	r.HandleFunc("/game/start-game/{room_link}", controllers_game.StartGameController)
+	r.HandleFunc("/game/start-play/{room_link}", controllers_game.StartPlayController)
+	r.HandleFunc("/game/start-rounds", controllers_game.StartRoundsController)
+
+	// r.HandleFunc("/game/start-timer", controllers_game.StartTimerController)
 
 	// Start rabbitmq queues
 	rabbitmq.QueueRabbitStart()
