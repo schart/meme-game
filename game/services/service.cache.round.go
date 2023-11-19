@@ -84,11 +84,10 @@ func PlayerThrownACardService(roomid int, data map[string]interface{}) bool {
 		fmt.Println("JSON decode error:  ", err)
 		return false
 	}
-	fmt.Println("new: ", newThrowers)
+
 	accountid := data["accountId"]
 	for i := 0; i < len(newThrowers); i++ {
 		if accountid == newThrowers[i] {
-			fmt.Println("test: ", accountid, newThrowers[i])
 			return true
 		}
 	}
@@ -130,8 +129,16 @@ func DeleteThrownCardService(roomid int) error {
 	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 	ctx := context.Background()
 
+	var card_throwers []string = []string{}
+
+	jsonThrowers, err := json.Marshal(card_throwers)
+	if err != nil {
+		fmt.Println(err)
+		return fmt.Errorf("JSON marshaling error: %s", err.Error())
+	}
+
 	roundKey := "round:" + strconv.Itoa(int(roomid))
-	err := client.HDel(ctx, roundKey, "card_throwers").Err()
+	err = client.HMSet(ctx, roundKey, "card_throwers", string(jsonThrowers)).Err()
 	if err != nil {
 		fmt.Println("[DeleteThrownCardService] ERROR: ", err)
 		return err

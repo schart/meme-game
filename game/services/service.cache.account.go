@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	queries_account "shared-library/database/queries/queries-account"
 	queries_meme "shared-library/database/queries/queries-meme"
 	connection_redis "shared-library/redis"
 	utils "shared-library/utils"
@@ -133,8 +134,6 @@ func DropCardService(data map[string]interface{}, roomid int) error {
 
 	card_throwers := client.HGet(ctx, roundKey, "card_throwers").Val()
 
-	fmt.Println("card_throwers: ", card_throwers, roomid)
-
 	new_card_throwers := []string{}
 	err = json.Unmarshal([]byte(card_throwers), &new_card_throwers)
 	if err != nil {
@@ -170,11 +169,25 @@ func GiveVoteService(data map[string]interface{}, roomid int) error {
 	*/
 
 	if refere_status == "1" {
-		if data["affectedId"].(string) == data["accountId"].(string) {
+
+		stringAffected := data["affectedId"].(string)
+		
+		if stringAffected == data["accountId"].(string) {
 			return fmt.Errorf("A referee can not give vote him")
 		}
 
-		accountKey = "account:" + data["affectedId"].(string)
+		intAffected, err := strconv.Atoi(stringAffected)
+		if err != nil {
+			return err
+		}
+
+		roomOfAccount := queries_account.GetRoomOfAccount(float64(intAffected))
+		if roomOfAccount == nil {
+			return fmt.Errorf("Account is not founded")
+
+		}
+
+		accountKey = "account:" + stringAffected
 
 		votes := client.HGet(ctx, accountKey, "votes").Val()
 		convertedVotes, _ := strconv.Atoi(votes)
@@ -186,12 +199,22 @@ func GiveVoteService(data map[string]interface{}, roomid int) error {
 
 		*/
 
-		err := client.HSet(ctx, accountKey, map[string]interface{}{"votes": convertedVotes + 1}).Err()
+		err = client.HSet(ctx, accountKey, map[string]interface{}{"votes": convertedVotes + 1}).Err()
 		if err != nil {
 			return fmt.Errorf("Redis HSet error: %s", err.Error())
 		}
 
-		err = client.HDel(ctx, "room:"+strconv.Itoa(roomid), "card_throwers").Err()
+		roundKey := "round:" + strconv.Itoa(roomid)
+
+		card_throwers := []string{}
+
+		json_throwers, err := json.Marshal(card_throwers)
+		if err != nil {
+			fmt.Println(err)
+			return fmt.Errorf("JSON marshaling error: %s", err.Error())
+		}
+
+		err = client.HSet(ctx, roundKey, "card_throwers", string(json_throwers)).Err()
 		if err != nil {
 			return fmt.Errorf(err.Error())
 		}
