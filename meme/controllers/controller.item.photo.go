@@ -22,7 +22,7 @@ func PhotoItemsController(w http.ResponseWriter, r *http.Request) {
 
 	count := mux.Vars(r)["count"]
 	if count == "" {
-		utils.HandleError(w, http.StatusMethodNotAllowed, "Count is needed for get the  records of texts")
+		utils.HandleError(w, http.StatusMethodNotAllowed, "Count is needed for get the records of texts")
 	}
 
 	countInt, err := strconv.Atoi(count)
@@ -33,8 +33,8 @@ func PhotoItemsController(w http.ResponseWriter, r *http.Request) {
 
 	/*
 
-	  @ We taken params and converted needed data type to use
-	  @ Finally, taken cards/photos in the database according to count
+	  @ We taken params and converted needed data type to use!
+	  @ Finally, taken cards/photos in the database according to count!
 
 	*/
 
