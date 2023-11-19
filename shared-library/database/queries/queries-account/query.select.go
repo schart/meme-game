@@ -110,6 +110,10 @@ func GetRoomOfAccount(accountId float64) map[string]interface{} {
 			fmt.Println(err.Error())
 			return nil
 		}
+
+		if id == 0 {
+			return nil
+		}
 	}
 	// Add to struct data of keeped
 

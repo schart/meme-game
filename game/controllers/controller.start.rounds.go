@@ -21,9 +21,6 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check room is avaiable to ready for the play
-	// here
-
 	for {
 		_, p, err := conn.ReadMessage()
 		if err != nil {
@@ -48,6 +45,11 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 
 		intAccountId, _ := strconv.Atoi(data["accountId"].(string))
 		roomOfAccount := queries_account.GetRoomOfAccount(float64(intAccountId))
+		if roomOfAccount == nil {
+			utils.HandleErrorWS(conn, "undefiend account")
+			return
+		}
+
 		roomid := roomOfAccount["roomid"].(int)
 
 		/*
