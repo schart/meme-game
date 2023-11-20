@@ -120,11 +120,22 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 				@ And we checked player is referee or  referee try to give vote self..
 				@ Finally, we delete thrown card and increment to round counter
 
+				@ Notice: if players in last round, we turn winner after of voting
+
 			*/
 
 			err = service_redis.DeleteThrownCardService(roomid)
 			if err != nil {
 				utils.HandleErrorWS(conn, err.Error())
+				return
+			}
+
+			roundCounting := service_redis.GetRoundService(roomid)
+			if roundCounting == 5 {
+				winner := service_redis.FindWinnerService(roomid)
+				fmt.Println("winner: ", winner)
+
+				utils.HandleSuccessWS(conn, map[string]interface{}{"winner": winner})
 				return
 			}
 
@@ -134,7 +145,7 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			utils.HandleSuccessWS(conn, map[string]interface{}{"choosed_player": data["affectedId"]})
+			utils.HandleSuccessWS(conn, map[string]interface{}{"winner_of_round": data["affectedId"]})
 
 		default:
 			fmt.Println("Undefiend process type:", dataType)

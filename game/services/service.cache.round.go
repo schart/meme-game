@@ -166,3 +166,18 @@ func IncrementRoundService(roomid int) error {
 
 	return nil
 }
+
+func GetRoundService(roomid int) int {
+
+	utils.EnvLoader()
+
+	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
+	ctx := context.Background()
+
+	roundKey := "round:" + strconv.Itoa(roomid)
+
+	round := client.HGet(ctx, roundKey, "round").Val()
+	convertedRound, _ := strconv.Atoi(round)
+
+	return convertedRound
+}

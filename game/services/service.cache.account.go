@@ -153,7 +153,6 @@ func DropCardService(data map[string]interface{}, roomid int) error {
 	return nil
 }
 
-// Update vote/score, if you take vote from other players this win value as +1
 func GiveVoteService(data map[string]interface{}, roomid int) error {
 	utils.EnvLoader()
 
@@ -165,13 +164,15 @@ func GiveVoteService(data map[string]interface{}, roomid int) error {
 	refere_status := client.HGet(ctx, accountKey, "referee_status").Val()
 
 	/*
-		@ We checked account is referee
+
+		@ We checked account is referee.
+
 	*/
 
 	if refere_status == "1" {
 
 		stringAffected := data["affectedId"].(string)
-		
+
 		if stringAffected == data["accountId"].(string) {
 			return fmt.Errorf("A referee can not give vote him")
 		}
@@ -224,4 +225,61 @@ func GiveVoteService(data map[string]interface{}, roomid int) error {
 	}
 
 	return nil
+}
+
+func FindWinnerService(roomid int) string {
+	utils.EnvLoader()
+
+	client := connection_redis.Connect(os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
+	ctx := context.Background()
+
+	roomKey := "room:" + strconv.Itoa(roomid)
+
+	countUser := client.HGet(ctx, roomKey, "count_user").Val()
+	countUserInteger, err := strconv.Atoi(countUser)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+
+	/*
+
+		@ Taken count of players, for check all of them.
+		@ Now, we identify the winning player.
+
+	*/
+
+	var winnerId int = 0
+	var bigestVote int = 0
+
+	for i := 1; i < countUserInteger; i++ {
+		accountKey := "account:" + strconv.Itoa(i)
+
+		vote := client.HGet(ctx, accountKey, "votes").Val()
+		if vote != "" {
+			voteInteger, err := strconv.Atoi(vote)
+			if err != nil {
+				fmt.Println(err)
+				return ""
+			}
+
+			if bigestVote < voteInteger {
+				bigestVote = voteInteger
+				winnerId = i
+			}
+
+		}
+
+	}
+
+	fmt.Println("winner id with him votes: ", winnerId, bigestVote)
+
+	accountInformations := queries_account.GetAccountViaId(float64(winnerId))
+	if accountInformations == nil {
+		fmt.Println("Account not founded", accountInformations)
+		return ""
+	}
+
+	fmt.Println("winner: ", winnerId, accountInformations["username"].(string))
+	return accountInformations["username"].(string)
 }

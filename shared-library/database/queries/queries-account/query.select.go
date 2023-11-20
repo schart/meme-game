@@ -10,11 +10,38 @@ import (
 /*
 	@ Queries of Account table
 
+	- Get account. via id
 	- Get account. via username
 	- Account verified or unverified?
 	- Account available? via username
 	- Account available? via id
 */
+
+func GetAccountViaId(accountId float64) map[string]interface{} {
+	accountCursor := cursors.AccountCursorTurn()
+	row := accountCursor.QueryRow(`SELECT * FROM public.account WHERE id = $1`, accountId)
+	fmt.Println("[GetAccountViaId] row result: ", row)
+
+	var id int
+	var username, password string
+
+	err := row.Scan(&id, &username, &password)
+	if err != nil {
+		return nil
+	}
+
+	if id == 0 {
+		return nil
+	}
+
+	account := map[string]interface{}{}
+
+	account["id"] = id
+	account["username"] = username
+	account["password"] = password
+
+	return account
+}
 
 func GetAccountViaUsername(_username string) map[string]interface{} {
 	accountCursor := cursors.AccountCursorTurn()
@@ -32,13 +59,13 @@ func GetAccountViaUsername(_username string) map[string]interface{} {
 		return nil
 	}
 
-	room := map[string]interface{}{}
+	account := map[string]interface{}{}
 
-	room["id"] = id
-	room["username"] = username
-	room["password"] = password
+	account["id"] = id
+	account["username"] = username
+	account["password"] = password
 
-	return room
+	return account
 }
 
 func AccountAvaliableViaId(accountId float64) bool {
