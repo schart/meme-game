@@ -17,10 +17,9 @@ import (
 	- Account available? via id
 */
 
-func GetAccountViaId(accountId float64) map[string]interface{} {
+func GetAccountViaId(accountId float64) map[string]interface{} { 
 	accountCursor := cursors.AccountCursorTurn()
 	row := accountCursor.QueryRow(`SELECT * FROM public.account WHERE id = $1`, accountId)
-	fmt.Println("[GetAccountViaId] row result: ", row)
 
 	var id int
 	var username, password string

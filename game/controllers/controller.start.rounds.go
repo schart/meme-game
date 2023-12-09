@@ -103,7 +103,7 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 			*/
 
 			thrownCardPlayer := service_redis.ThrownCardService(roomid)
-			if len(thrownCardPlayer) < 1 {
+			if len(thrownCardPlayer) < 5 {
 				utils.HandleErrorWS(conn, "Each player must throw a card in round!")
 				return
 			}
@@ -133,7 +133,6 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 			roundCounting := service_redis.GetRoundService(roomid)
 			if roundCounting == 5 {
 				winner := service_redis.FindWinnerService(roomid)
-				fmt.Println("winner: ", winner)
 
 				utils.HandleSuccessWS(conn, map[string]interface{}{"winner": winner})
 				return
@@ -145,12 +144,19 @@ func StartRoundsController(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			utils.HandleSuccessWS(conn, map[string]interface{}{"winner_of_round": data["affectedId"]})
+			intAffectedId, err := strconv.Atoi(data["affectedId"].(string))
+			if err != nil {
+				utils.HandleErrorWS(conn, err.Error())
+				return
+			}
+
+			affectedAccount := queries_account.GetAccountViaId(float64(intAffectedId))
+			utils.HandleSuccessWS(conn, map[string]interface{}{"winner_of_round": affectedAccount["username"]})
 
 		default:
 			fmt.Println("Undefiend process type:", dataType)
 			utils.HandleErrorWS(conn, "Undefiend process type:"+dataType)
-			return
+
 		}
 	}
 
